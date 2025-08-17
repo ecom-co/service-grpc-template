@@ -1,9 +1,4 @@
-import {
-    GrpcExceptionFilter,
-    GrpcValidationPipe,
-    GrpcBootstrapper,
-    ServiceManager as GrpcServiceManager,
-} from '@ecom-co/grpc';
+import { GrpcExceptionFilter, GrpcValidationPipe, GrpcStarter } from '@ecom-co/grpc';
 import { ClassSerializerInterceptor, Logger } from '@nestjs/common';
 import { NestApplication, NestFactory, Reflector } from '@nestjs/core';
 
@@ -21,7 +16,7 @@ const bootstrap = async (): Promise<void> => {
     });
 
     // Get config service
-    const configService = app.get(ConfigServiceApp);
+    const _configService = app.get(ConfigServiceApp);
 
     // Use custom gRPC validation pipe
     app.useGlobalPipes(new GrpcValidationPipe());
@@ -42,16 +37,24 @@ const bootstrap = async (): Promise<void> => {
 
     app.useGlobalFilters(filter);
 
-    // Setup and start multiple gRPC microservices using GrpcBootstrapper
-    const logger = new Logger('Bootstrap');
-    const serviceManager = app.get(GrpcServiceManager);
+    // Start the application first
+    await app.init();
 
-    await GrpcBootstrapper.bootstrap(app, serviceManager, {
-        appModule: AppModule,
-        logger,
-        logEnvironment: true,
-        getEnvironment: () => configService.nodeEnv,
-        maxConcurrency: 3,
+    const logger = new Logger('Bootstrap');
+    logger.log('Application started successfully!');
+
+    // Use setImmediate to defer gRPC startup until after all current operations
+    setImmediate(() => {
+        void (async () => {
+            try {
+                const grpcStarter = app.get(GrpcStarter); // Use class reference
+                grpcStarter.setAppModule(AppModule);
+                await grpcStarter.start();
+                logger.log('gRPC services bootstrapped manually!');
+            } catch (error) {
+                logger.error('Failed to start gRPC services:', error);
+            }
+        })();
     });
 };
 

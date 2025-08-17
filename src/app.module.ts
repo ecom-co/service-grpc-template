@@ -1,10 +1,11 @@
 import { ElasticsearchModule } from '@ecom-co/elasticsearch';
-import { GrpcModule, GrpcServiceConfig, GrpcValidationPipe } from '@ecom-co/grpc';
+import { GrpcModule, GrpcValidationPipe } from '@ecom-co/grpc';
 import { CORE_ENTITIES, OrmModule } from '@ecom-co/orm';
 import { RedisModule } from '@ecom-co/redis';
 import { Module } from '@nestjs/common';
 import { ConfigModule as NestConfigModule } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
+import { filter, map } from 'lodash';
 
 import { ConfigModule } from '@/modules/config/config.module';
 import { ConfigServiceApp } from '@/modules/config/config.service';
@@ -14,6 +15,22 @@ import { UserModule } from '@/modules/user/user.module';
 import { AppGrpcController } from '@/app.grpc.controller';
 import { AppService } from '@/app.service';
 
+const services = [
+    {
+        name: 'User Service',
+        package: 'user',
+        protoPath: 'src/proto/services/user.proto',
+        port: 50052,
+        enabled: true,
+    },
+    {
+        name: 'App Service',
+        package: 'app',
+        protoPath: 'src/proto/app.proto',
+        port: 50053,
+        enabled: true,
+    },
+];
 @Module({
     imports: [
         NestConfigModule.forRoot(),
@@ -66,31 +83,16 @@ import { AppService } from '@/app.service';
         }),
         RabbitmqModule,
 
-        // Configure gRPC services
-        GrpcModule.forRootAsync({
-            inject: [ConfigServiceApp],
-            useFactory: (_configService: ConfigServiceApp) => {
-                const services: GrpcServiceConfig[] = [
-                    {
-                        name: 'User Service',
-                        package: 'user',
-                        protoPath: 'src/proto/services/user.proto',
-                        port: 50052,
-                        enabled: true,
-                    },
-                    {
-                        name: 'App Service',
-                        package: 'app',
-                        protoPath: 'src/proto/app.proto',
-                        port: 50053,
-                        enabled: true,
-                    },
-                ];
-
-                return {
-                    services,
-                };
-            },
+        GrpcModule.forRoot({
+            services: map(
+                filter(services, (s) => s.enabled),
+                (s) => ({
+                    name: s.name,
+                    package: s.package,
+                    protoPath: s.protoPath,
+                    port: s.port,
+                }),
+            ),
         }),
 
         ConfigModule,

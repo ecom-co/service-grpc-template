@@ -23,6 +23,9 @@ export interface EnvironmentVariables {
     GRPC_PORT?: number;
     GRPC_PACKAGE?: string;
     GRPC_PROTO_PATH?: string;
+
+    // Tracing Configuration
+    JAEGER_ENDPOINT?: string;
 }
 
 export const validate = (config: Record<string, unknown>): EnvironmentVariables => {
@@ -61,4 +64,7 @@ export const validationSchema = Joi.object({
     GRPC_PORT: Joi.number().default(50051),
     GRPC_PACKAGE: Joi.string().default('app'),
     GRPC_PROTO_PATH: Joi.string().default('src/proto/services/user.proto'),
+
+    // Tracing Configuration
+    JAEGER_ENDPOINT: Joi.string().optional().description('Jaeger collector endpoint for distributed tracing'),
 });

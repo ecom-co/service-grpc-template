@@ -62,4 +62,9 @@ export class ConfigServiceApp {
     get grpcProtoPath(): string {
         return this.configService.get('GRPC_PROTO_PATH', 'src/proto/services/user.proto');
     }
+
+    // Tracing Configuration
+    get jaegerEndpoint(): string | undefined {
+        return this.configService.get('JAEGER_ENDPOINT');
+    }
 }
