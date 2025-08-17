@@ -1,42 +1,15 @@
-/* eslint-disable no-console */
 import {
-    ClassSerializerInterceptor,
-    ValidationPipe,
-    ExceptionFilter,
-    Catch,
-    ArgumentsHost,
-    HttpException,
-    HttpStatus,
-} from '@nestjs/common';
+    GrpcExceptionFilter,
+    GrpcValidationPipe,
+    GrpcBootstrapper,
+    ServiceManager as GrpcServiceManager,
+} from '@ecom-co/grpc';
+import { ClassSerializerInterceptor, Logger } from '@nestjs/common';
 import { NestApplication, NestFactory, Reflector } from '@nestjs/core';
-import { RpcException } from '@nestjs/microservices';
-import { map } from 'lodash';
 
 import { ConfigServiceApp } from '@/modules/config/config.service';
 
 import { AppModule } from '@/app.module';
-import { ServiceManager } from '@/services';
-
-@Catch()
-export class GrpcExceptionFilter implements ExceptionFilter {
-    catch(exception: unknown, host: ArgumentsHost) {
-        console.error('gRPC Exception occurred:', exception);
-
-        // For gRPC, we throw RpcException
-        if (exception instanceof HttpException) {
-            throw new RpcException({
-                status: exception.getStatus(),
-                message: exception.getResponse(),
-            });
-        }
-
-        // For other exceptions
-        throw new RpcException({
-            status: HttpStatus.INTERNAL_SERVER_ERROR,
-            message: 'Internal server error',
-        });
-    }
-}
 
 /**
  * Bootstrap the NestJS application
@@ -50,43 +23,36 @@ const bootstrap = async (): Promise<void> => {
     // Get config service
     const configService = app.get(ConfigServiceApp);
 
-    const validationPipe: ValidationPipe = new ValidationPipe({
-        transform: true,
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        enableDebugMessages: configService.isDevelopment,
-        skipMissingProperties: false,
-        skipNullProperties: false,
-        skipUndefinedProperties: false,
-    });
-    app.useGlobalPipes(validationPipe);
+    // Use custom gRPC validation pipe
+    app.useGlobalPipes(new GrpcValidationPipe());
 
     // Global class serializer interceptor
     app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
     // Add GrpcExceptionFilter to handle exceptions globally
-    app.useGlobalFilters(new GrpcExceptionFilter());
+    const filter = new GrpcExceptionFilter({
+        isDevelopment: false,
+        enableLogging: true,
+        enableMetrics: true,
+        enableAsyncLogging: true, // New
+        maxDetailsSize: 1000, // New - 1KB limit
+        errorRateLimit: 10, // New - 10 errors/minute
+        rateLimitWindowMs: 60000, // New - 1 minute window
+    });
 
-    // Setup and start multiple gRPC microservices using ServiceManager
-    const serviceManager = app.get(ServiceManager);
-    const enabledServices = serviceManager.getEnabledServices();
+    app.useGlobalFilters(filter);
 
-    // Log services status
-    serviceManager.logServicesStatus();
+    // Setup and start multiple gRPC microservices using GrpcBootstrapper
+    const logger = new Logger('Bootstrap');
+    const serviceManager = app.get(GrpcServiceManager);
 
-    for (const service of enabledServices) {
-        try {
-            const microserviceOptions = serviceManager.getMicroserviceOptions(service);
-            const grpcApp = await NestFactory.createMicroservice(AppModule, microserviceOptions);
-            await grpcApp.listen();
-            console.log(`${service.name} running on port ${service.port}`);
-        } catch (err) {
-            console.error(`Failed to start ${service.name}`, err as Error);
-        }
-    }
-
-    console.log(`Environment: ${configService.nodeEnv}`);
-    console.log(`Enabled services: ${map(enabledServices, (s) => s.name).join(', ')}`);
+    await GrpcBootstrapper.bootstrap(app, serviceManager, {
+        appModule: AppModule,
+        logger,
+        logEnvironment: true,
+        getEnvironment: () => configService.nodeEnv,
+        maxConcurrency: 3,
+    });
 };
 
 void bootstrap();

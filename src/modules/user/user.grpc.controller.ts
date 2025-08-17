@@ -1,3 +1,4 @@
+import { GrpcNotFoundException, GrpcValidationException } from '@ecom-co/grpc';
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 
@@ -10,6 +11,9 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UserGrpcController {
     @GrpcMethod('UserService', 'CreateUser')
     createUser(data: CreateUserDto) {
+        // Validation will be handled by GrpcValidationPipe
+        // If validation fails, it will throw GrpcValidationException
+
         // Mock implementation
         return {
             id: 'user-123',
@@ -23,7 +27,17 @@ export class UserGrpcController {
 
     @GrpcMethod('UserService', 'GetUser')
     getUser(data: GetUserDto) {
-        // Mock implementation
+        // Mock implementation with error handling example
+        if (data.id === 'not-found') {
+            throw new GrpcNotFoundException('User not found');
+        }
+
+        if (data.id === 'invalid') {
+            throw new GrpcValidationException(['Invalid user ID format'], {
+                id: { format: 'ID must be a valid UUID' },
+            });
+        }
+
         return {
             id: data.id,
             name: 'John Doe',

@@ -1,6 +1,6 @@
 # E-commerce Platform - gRPC Template
 
-A scalable microservices template built with NestJS and gRPC for e-commerce applications.
+A scalable microservices template built with NestJS, gRPC, and the `@ecom-co/grpc` library for e-commerce applications.
 
 ## 🚀 Features
 
@@ -8,10 +8,11 @@ A scalable microservices template built with NestJS and gRPC for e-commerce appl
 - **NestJS Framework**: Modern Node.js framework with TypeScript support
 - **Microservices Architecture**: Scalable service-based architecture
 - **TypeORM Integration**: Database ORM with PostgreSQL support
-- **Validation**: Request validation using class-validator and custom decorators
-- **Standardized Responses**: Consistent API response format using `@ecom-co/utils`
+- **Validation**: Request validation using class-validator and `@ecom-co/grpc` validation pipes
+- **gRPC Exception Handling**: Advanced error handling with `@ecom-co/grpc` filters
+- **Standardized gRPC Library**: Using `@ecom-co/grpc` for service management and utilities
 - **Docker Support**: Containerized development and production environments
-- **Service Registry**: Dynamic service management and configuration
+- **Dynamic Service Configuration**: Service management using `@ecom-co/grpc` module
 
 ## 📋 Prerequisites
 
@@ -67,11 +68,7 @@ src/
 ├── proto/
 │   └── services/
 │       └── user.proto  # gRPC Protocol Buffers
-├── services/
-│   ├── service-registry.ts    # Service management
-│   ├── service-manager.ts     # Service orchestration
-│   └── service-config.ts      # Service configuration
-└── main.ts            # Application entry point
+└── main.ts            # Application entry point with @ecom-co/grpc bootstrapper
 ```
 
 ### Port Configuration
@@ -103,17 +100,25 @@ lsof -i :50052
 netstat -tulpn | grep 50052
 ```
 
-2. **Change service port in configuration:**
+2. **Change service port in app.module.ts:**
 
 ```typescript
-// src/services/service-registry.ts
-{
-    name: 'User Service',
-    package: 'user',
-    protoPath: 'src/proto/services/user.proto',
-    port: 50053, // Change to available port
-    enabled: true,
-}
+// src/app.module.ts - GrpcModule configuration
+GrpcModule.forRootAsync({
+    inject: [ConfigServiceApp],
+    useFactory: (_configService: ConfigServiceApp) => {
+        const services: GrpcServiceConfig[] = [
+            {
+                name: 'User Service',
+                package: 'user',
+                protoPath: 'src/proto/services/user.proto',
+                port: 50053, // Change to available port
+                enabled: true,
+            },
+        ];
+        return { services };
+    },
+}),
 ```
 
 3. **Update Docker configuration:**
@@ -277,19 +282,26 @@ healthcheck:
 
 ### Service Configuration
 
-Services can be enabled/disabled in `src/services/service-registry.ts`:
+Services are configured in `src/app.module.ts` using `@ecom-co/grpc`:
 
 ```typescript
-const services: GrpcServiceConfig[] = [
-    {
-        name: 'User Service',
-        package: 'user',
-        protoPath: 'src/proto/services/user.proto',
-        port: 50052,
-        enabled: true,
+// src/app.module.ts
+GrpcModule.forRootAsync({
+    inject: [ConfigServiceApp],
+    useFactory: (_configService: ConfigServiceApp) => {
+        const services: GrpcServiceConfig[] = [
+            {
+                name: 'User Service',
+                package: 'user',
+                protoPath: 'src/proto/services/user.proto',
+                port: 50052,
+                enabled: true,
+            },
+            // Add more services here
+        ];
+        return { services };
     },
-    // Add more services here
-];
+}),
 ```
 
 ## 📦 Adding New Services
@@ -316,17 +328,26 @@ src/modules/new-service/
 └── new-service.module.ts
 ```
 
-3. **Register Service with Port Assignment**
+3. **Register Service in App Module**
 
 ```typescript
-// src/services/service-registry.ts
-{
-    name: 'New Service',
-    package: 'newservice',
-    protoPath: 'src/proto/services/new-service.proto',
-    port: 50053,  // ← Choose next available port
-    enabled: true,
-}
+// src/app.module.ts - Add to GrpcModule configuration
+GrpcModule.forRootAsync({
+    inject: [ConfigServiceApp],
+    useFactory: (_configService: ConfigServiceApp) => {
+        const services: GrpcServiceConfig[] = [
+            // ... existing services
+            {
+                name: 'New Service',
+                package: 'newservice',
+                protoPath: 'src/proto/services/new-service.proto',
+                port: 50053,  // ← Choose next available port
+                enabled: true,
+            },
+        ];
+        return { services };
+    },
+}),
 ```
 
 4. **Update Docker Configuration**
@@ -337,7 +358,7 @@ ports:
     - '50053:50053' # ← Match the service port
 ```
 
-5. **Add to App Module**
+5. **Add to App Module Imports**
 
 ```typescript
 // src/app.module.ts
@@ -346,6 +367,8 @@ imports: [
     NewServiceModule,
 ];
 ```
+
+The `@ecom-co/grpc` library will automatically handle service registration and management.
 
 ### Port Assignment Guidelines
 
@@ -366,9 +389,9 @@ imports: [
 
 **Common Port Problems:**
 
-1. **Port already in use**: Change port in service registry
+1. **Port already in use**: Change port in GrpcModule configuration
 2. **Docker port conflict**: Update docker-compose.yml
-3. **Health check failing**: Verify port is correctly configured
+3. **Health check failing**: Verify port is correctly configured in app.module.ts
 
 **Debug Commands:**
 
@@ -410,6 +433,7 @@ docker-compose logs api
 
 ### Custom Dependencies
 
+- `@ecom-co/grpc`: gRPC service management, validation, and utilities
 - `@ecom-co/orm`: TypeORM integration
 - `@ecom-co/redis`: Redis integration
 - `@ecom-co/elasticsearch`: Elasticsearch integration

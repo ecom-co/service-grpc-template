@@ -1,6 +1,7 @@
+import { GrpcNotFoundException } from '@ecom-co/grpc';
 import { BaseRepository, InjectRepository, User } from '@ecom-co/orm';
 import { ApiResponseData, ApiPaginatedResponseData, Paging } from '@ecom-co/utils';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { map } from 'lodash';
 
 import { CreateUserDto } from './dto/create-user.dto';
@@ -77,7 +78,7 @@ export class UserService {
         });
 
         if (!user) {
-            throw new NotFoundException('User not found');
+            throw new GrpcNotFoundException('User not found');
         }
 
         return new ApiResponseData({
@@ -93,7 +94,7 @@ export class UserService {
         });
 
         if (!user) {
-            throw new NotFoundException('User not found');
+            throw new GrpcNotFoundException('User not found');
         }
 
         const updatedUser = await this.userRepository.save({
@@ -114,7 +115,7 @@ export class UserService {
         });
 
         if (!user) {
-            throw new NotFoundException('User not found');
+            throw new GrpcNotFoundException('User not found');
         }
 
         await this.userRepository.remove(user);
