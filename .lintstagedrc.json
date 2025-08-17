@@ -1,7 +1,20 @@
 {
-    "src/**/*.{js,jsx,ts,tsx}": ["eslint --fix --max-warnings 0 --no-warn-ignored", "prettier --write"],
-    "test/**/*.{js,jsx,ts,tsx}": ["eslint --fix --max-warnings 0 --no-warn-ignored", "prettier --write"],
-    "*.{json,yml,yaml}": ["prettier --write"],
-    "*.md": ["prettier --write"],
-    "package.json": ["prettier --write", "npx sort-package-json"]
+    "src/**/*.{js,jsx,ts,tsx}": [
+        "eslint --fix --max-warnings 0 --no-warn-ignored",
+        "npx prettier --write"
+    ],
+    "test/**/*.{js,jsx,ts,tsx}": [
+        "eslint --fix --max-warnings 0 --no-warn-ignored",
+        "npx prettier --write"
+    ],
+    "*.{json,yml,yaml}": [
+        "npx prettier --write"
+    ],
+    "*.md": [
+        "npx prettier --write"
+    ],
+    "package.json": [
+        "npx prettier --write",
+        "npx sort-package-json"
+    ]
 }
