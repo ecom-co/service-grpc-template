@@ -1,0 +1,39 @@
+name: ecom
+
+services:
+    # API Server - Development Mode
+    api:
+        build:
+            context: .
+            dockerfile: Dockerfile
+            target: dev
+            args:
+                GITHUB_TOKEN: ${GITHUB_TOKEN}
+        container_name: ecom-api-dev
+        env_file:
+            - .env.docker
+        volumes:
+            - .:/app
+            - /app/node_modules
+            - ./.env.docker:/app/.env:ro
+        command: sh -c "npm install && npm run start:dev"
+        ports:
+            - '50052:50052' # gRPC port
+            - '9230:9229' # Debug port
+        external_links:
+            - ecom-postgres
+            - ecom-redis
+            - ecom-rabbitmq
+            - ecom-elasticsearch
+        networks:
+            - ecom-network
+        healthcheck:
+            test: ['CMD', 'nc', '-z', 'localhost', '50052']
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 60s
+
+networks:
+    ecom-network:
+        external: true

@@ -1,0 +1,51 @@
+name: Docker setup
+description: Track and document the Docker environment
+title: 'chore(docker): standardize Docker setup'
+labels: ['chore', 'docs', 'docker']
+assignees: []
+body:
+    - type: markdown
+      attributes:
+          value: |
+              Document the current Docker setup and ensure consistency across machines.
+
+    - type: textarea
+      id: summary
+      attributes:
+          label: Summary
+          placeholder: Describe the docker stack and objectives
+      validations:
+          required: true
+
+    - type: checkboxes
+      id: services
+      attributes:
+          label: Services included
+          options:
+              - label: API (dev)
+              - label: PostgreSQL
+              - label: Redis
+              - label: RabbitMQ
+              - label: PgAdmin
+              - label: Elasticsearch & Kibana
+
+    - type: checkboxes
+      id: tasks
+      attributes:
+          label: Tasks
+          options:
+              - label: Ports standardized and documented
+              - label: Env files updated (.env, .env.docker, .env.example)
+              - label: Docs added (docs/docker.md)
+              - label: Helper scripts added (docker/docker-scripts.md)
+              - label: DB init script mounted (docker/postgres/init.sql)
+              - label: Health checks verified (api, db, redis, mq, es, kibana)
+
+    - type: textarea
+      id: notes
+      attributes:
+          label: Notes/Links
+          value: |
+              - Docs: docs/docker.md
+              - Scripts: docker/docker-scripts.md
+              - Compose: docker-compose.yml
