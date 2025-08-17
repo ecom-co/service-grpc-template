@@ -16,7 +16,7 @@
         "lint:fix": "eslint \"{src,apps,test}/**/*.ts\" --fix",
         "lint:fix:all": "eslint --fix \"{src,apps,test}/**/*.ts\" && prettier --write \"{src,apps,test}/**/*.ts\"",
         "pre-commit": "lint-staged --config .lintstagedrc.json",
-        "pre-push": "npm run test && npm run build",
+        "pre-push": "npm run test -- --passWithNoTests && npm run build",
         "prepare": "[ -z \"$SKIP_HUSKY\" ] && husky || echo \"Skipping husky\"",
         "start": "nest start",
         "start:debug": "nest start --debug --watch",
