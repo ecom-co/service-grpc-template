@@ -15,7 +15,7 @@ A scalable microservices template built with NestJS and gRPC for e-commerce appl
 
 ## 📋 Prerequisites
 
-- Node.js 18+ 
+- Node.js 18+
 - Docker & Docker Compose
 - PostgreSQL
 - Redis
@@ -25,23 +25,27 @@ A scalable microservices template built with NestJS and gRPC for e-commerce appl
 ## 🛠️ Installation
 
 1. **Clone the repository**
+
 ```bash
 git clone <repository-url>
 cd template
 ```
 
 2. **Install dependencies**
+
 ```bash
 npm install
 ```
 
 3. **Environment setup**
+
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
 ```
 
 4. **Start external services**
+
 ```bash
 # Start PostgreSQL, Redis, RabbitMQ, Elasticsearch
 docker-compose up -d postgres redis rabbitmq elasticsearch
@@ -50,6 +54,7 @@ docker-compose up -d postgres redis rabbitmq elasticsearch
 ## 🏗️ Architecture
 
 ### Service Structure
+
 ```
 src/
 ├── modules/
@@ -71,15 +76,16 @@ src/
 
 ### Port Configuration
 
-| Service | Port | Description |
-|---------|------|-------------|
-| User Service | 50052 | User management operations |
-| Product Service | 50053 | Product catalog (planned) |
-| Order Service | 50054 | Order processing (planned) |
-| Payment Service | 50055 | Payment processing (planned) |
-| Notification Service | 50056 | Notifications (planned) |
+| Service              | Port  | Description                  |
+| -------------------- | ----- | ---------------------------- |
+| User Service         | 50052 | User management operations   |
+| Product Service      | 50053 | Product catalog (planned)    |
+| Order Service        | 50054 | Order processing (planned)   |
+| Payment Service      | 50055 | Payment processing (planned) |
+| Notification Service | 50056 | Notifications (planned)      |
 
 **Important Notes:**
+
 - **Port 50051**: Reserved for main backend application (avoid conflicts)
 - **Port Range 50052-50060**: Available for microservices in this template
 - **Dynamic Port Assignment**: Services automatically get next available port
@@ -89,6 +95,7 @@ src/
 If you encounter port conflicts:
 
 1. **Check running services:**
+
 ```bash
 # Check what's using port 50052
 lsof -i :50052
@@ -97,6 +104,7 @@ netstat -tulpn | grep 50052
 ```
 
 2. **Change service port in configuration:**
+
 ```typescript
 // src/services/service-registry.ts
 {
@@ -109,13 +117,15 @@ netstat -tulpn | grep 50052
 ```
 
 3. **Update Docker configuration:**
+
 ```yaml
 # docker-compose.yml
 ports:
-  - '50053:50053' # Match the new port
+    - '50053:50053' # Match the new port
 ```
 
 4. **Update environment variables:**
+
 ```env
 # .env
 GRPC_PORT=50053
@@ -130,17 +140,20 @@ GRPC_PORT=50053
 ## 🚀 Running the Application
 
 ### Development Mode
+
 ```bash
 npm run start:dev
 ```
 
 ### Production Mode
+
 ```bash
 npm run build
 npm run start:prod
 ```
 
 ### Docker
+
 ```bash
 # Development
 docker-compose up api
@@ -155,6 +168,7 @@ docker run -p 50052:50052 ecom-api
 ### User Service (Port 50052)
 
 #### Available Methods:
+
 - `CreateUser(CreateUserRequest) → UserResponse`
 - `GetUser(GetUserRequest) → UserResponse`
 - `UpdateUser(UpdateUserRequest) → UserResponse`
@@ -164,6 +178,7 @@ docker run -p 50052:50052 ecom-api
 #### Request Examples:
 
 **Create User:**
+
 ```protobuf
 message CreateUserRequest {
   string name = 1;
@@ -173,6 +188,7 @@ message CreateUserRequest {
 ```
 
 **List Users:**
+
 ```protobuf
 message ListUsersRequest {
   int32 page = 1;
@@ -183,17 +199,20 @@ message ListUsersRequest {
 ## 🧪 Testing
 
 ### gRPC Client Test
+
 ```bash
 # Create a test client (example)
 node test-grpc-client.js
 ```
 
 ### Unit Tests
+
 ```bash
 npm run test
 ```
 
 ### E2E Tests
+
 ```bash
 npm run test:e2e
 ```
@@ -229,28 +248,31 @@ SERVICE_PORT_RANGE_END=50060       # End of port range
 ### Port Configuration Files
 
 **Service Registry** (`src/services/service-registry.ts`):
+
 ```typescript
 const services: GrpcServiceConfig[] = [
     {
         name: 'User Service',
         package: 'user',
         protoPath: 'src/proto/services/user.proto',
-        port: 50052,  // ← Change this if port is in use
+        port: 50052, // ← Change this if port is in use
         enabled: true,
     },
 ];
 ```
 
 **Docker Configuration** (`docker-compose.yml`):
+
 ```yaml
 ports:
-  - '50052:50052'  # ← Must match service port
+    - '50052:50052' # ← Must match service port
 ```
 
 **Health Check**:
+
 ```yaml
 healthcheck:
-  test: ['CMD', 'nc', '-z', 'localhost', '50052']  # ← Must match service port
+    test: ['CMD', 'nc', '-z', 'localhost', '50052'] # ← Must match service port
 ```
 
 ### Service Configuration
@@ -273,6 +295,7 @@ const services: GrpcServiceConfig[] = [
 ## 📦 Adding New Services
 
 1. **Create Proto File**
+
 ```protobuf
 // src/proto/services/new-service.proto
 syntax = "proto3";
@@ -284,6 +307,7 @@ service NewService {
 ```
 
 2. **Create Module Structure**
+
 ```
 src/modules/new-service/
 ├── dto/
@@ -293,6 +317,7 @@ src/modules/new-service/
 ```
 
 3. **Register Service with Port Assignment**
+
 ```typescript
 // src/services/service-registry.ts
 {
@@ -305,19 +330,21 @@ src/modules/new-service/
 ```
 
 4. **Update Docker Configuration**
+
 ```yaml
 # docker-compose.yml
 ports:
-  - '50053:50053'  # ← Match the service port
+    - '50053:50053' # ← Match the service port
 ```
 
 5. **Add to App Module**
+
 ```typescript
 // src/app.module.ts
 imports: [
     // ... other imports
     NewServiceModule,
-]
+];
 ```
 
 ### Port Assignment Guidelines
@@ -330,6 +357,7 @@ imports: [
 ## 🔍 Monitoring & Debugging
 
 ### Health Checks
+
 - **gRPC Health**: `nc -z localhost 50052` (check if port is listening)
 - **Docker Health**: Configured in docker-compose.yml
 - **Port Status**: `lsof -i :50052` (check what's using the port)
@@ -337,11 +365,13 @@ imports: [
 ### Troubleshooting Port Issues
 
 **Common Port Problems:**
+
 1. **Port already in use**: Change port in service registry
 2. **Docker port conflict**: Update docker-compose.yml
 3. **Health check failing**: Verify port is correctly configured
 
 **Debug Commands:**
+
 ```bash
 # Check what's using a port
 lsof -i :50052
@@ -358,6 +388,7 @@ docker port <container-id>
 ```
 
 ### Logs
+
 ```bash
 # Application logs
 npm run start:dev
@@ -369,6 +400,7 @@ docker-compose logs api
 ## 📚 Dependencies
 
 ### Core Dependencies
+
 - `@nestjs/common`: NestJS core framework
 - `@nestjs/microservices`: gRPC microservices support
 - `@grpc/grpc-js`: gRPC implementation
@@ -377,6 +409,7 @@ docker-compose logs api
 - `class-transformer`: Data transformation
 
 ### Custom Dependencies
+
 - `@ecom-co/orm`: TypeORM integration
 - `@ecom-co/redis`: Redis integration
 - `@ecom-co/elasticsearch`: Elasticsearch integration
@@ -397,6 +430,7 @@ This project is licensed under the MIT License.
 ## 🆘 Support
 
 For support and questions:
+
 - Create an issue in the repository
 - Contact the development team
 - Check the documentation
@@ -404,3 +438,4 @@ For support and questions:
 ---
 
 **Happy coding! 🚀**
+test

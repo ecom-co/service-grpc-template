@@ -11,6 +11,7 @@
         "check-types": "tsc --noEmit --skipLibCheck",
         "commitlint": "commitlint --edit",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+        "format:staged": "prettier --write",
         "lint": "eslint \"{src,apps,test}/**/*.ts\"",
         "lint:fix": "eslint \"{src,apps,test}/**/*.ts\" --fix",
         "lint:fix:all": "eslint --fix \"{src,apps,test}/**/*.ts\" && prettier --write \"{src,apps,test}/**/*.ts\"",
