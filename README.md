@@ -76,10 +76,11 @@ src/
 | Service              | Port  | Description                  |
 | -------------------- | ----- | ---------------------------- |
 | User Service         | 50052 | User management operations   |
-| Product Service      | 50053 | Product catalog (planned)    |
-| Order Service        | 50054 | Order processing (planned)   |
-| Payment Service      | 50055 | Payment processing (planned) |
-| Notification Service | 50056 | Notifications (planned)      |
+| App Service          | 50053 | Application service          |
+| Product Service      | 50054 | Product catalog (planned)    |
+| Order Service        | 50055 | Order processing (planned)   |
+| Payment Service      | 50056 | Payment processing (planned) |
+| Notification Service | 50057 | Notifications (planned)      |
 
 **Important Notes:**
 
@@ -104,21 +105,16 @@ netstat -tulpn | grep 50052
 
 ```typescript
 // src/app.module.ts - GrpcModule configuration
-GrpcModule.forRootAsync({
-    inject: [ConfigServiceApp],
-    useFactory: (_configService: ConfigServiceApp) => {
-        const services: GrpcServiceConfig[] = [
-            {
-                name: 'User Service',
-                package: 'user',
-                protoPath: 'src/proto/services/user.proto',
-                port: 50053, // Change to available port
-                enabled: true,
-            },
-        ];
-        return { services };
-    },
-}),
+GrpcModule.forRoot({
+    services: [
+        {
+            name: 'User Service',
+            package: 'user',
+            protoPath: 'src/proto/services/user.proto',
+            url: 'localhost:50054', // Change to available port
+        },
+    ],
+});
 ```
 
 3. **Update Docker configuration:**
@@ -148,6 +144,18 @@ GRPC_PORT=50053
 
 ```bash
 npm run start:dev
+```
+
+**Expected output:**
+
+```
+[Nest] 78921  - 08/18/2025, 3:10:43 AM     LOG [Bootstrap] Application started successfully!
+[Nest] 78921  - 08/18/2025, 3:10:43 AM     LOG [GrpcServiceManager] gRPC server created for User Service at localhost:50052
+[Nest] 78921  - 08/18/2025, 3:10:43 AM     LOG [GrpcServiceManager] Service 'User Service' started at localhost:50052
+[Nest] 78921  - 08/18/2025, 3:10:43 AM     LOG [GrpcServiceManager] gRPC server created for App Service at localhost:50053
+[Nest] 78921  - 08/18/2025, 3:10:43 AM     LOG [GrpcServiceManager] Service 'App Service' started at localhost:50053
+[Nest] 78921  - 08/18/2025, 3:10:43 AM     LOG [GrpcServiceManager] Successfully started 2 gRPC services
+[Nest] 78921  - 08/18/2025, 3:10:43 AM     LOG [Bootstrap] gRPC services bootstrapped manually!
 ```
 
 ### Production Mode
@@ -252,18 +260,20 @@ SERVICE_PORT_RANGE_END=50060       # End of port range
 
 ### Port Configuration Files
 
-**Service Registry** (`src/services/service-registry.ts`):
+**Service Registry** (`src/app.module.ts`):
 
 ```typescript
-const services: GrpcServiceConfig[] = [
-    {
-        name: 'User Service',
-        package: 'user',
-        protoPath: 'src/proto/services/user.proto',
-        port: 50052, // ← Change this if port is in use
-        enabled: true,
-    },
-];
+// Configuration using GrpcModule.forRoot
+GrpcModule.forRoot({
+    services: [
+        {
+            name: 'User Service',
+            package: 'user',
+            protoPath: 'src/proto/services/user.proto',
+            url: 'localhost:50052', // Change this if port is in use
+        },
+    ],
+});
 ```
 
 **Docker Configuration** (`docker-compose.yml`):
@@ -286,22 +296,22 @@ Services are configured in `src/app.module.ts` using `@ecom-co/grpc`:
 
 ```typescript
 // src/app.module.ts
-GrpcModule.forRootAsync({
-    inject: [ConfigServiceApp],
-    useFactory: (_configService: ConfigServiceApp) => {
-        const services: GrpcServiceConfig[] = [
-            {
-                name: 'User Service',
-                package: 'user',
-                protoPath: 'src/proto/services/user.proto',
-                port: 50052,
-                enabled: true,
-            },
-            // Add more services here
-        ];
-        return { services };
-    },
-}),
+GrpcModule.forRoot({
+    services: [
+        {
+            name: 'User Service',
+            package: 'user',
+            protoPath: 'src/proto/services/user.proto',
+            url: 'localhost:50052',
+        },
+        {
+            name: 'App Service',
+            package: 'app',
+            protoPath: 'src/proto/app.proto',
+            url: 'localhost:50053',
+        },
+    ],
+});
 ```
 
 ## 📦 Adding New Services
@@ -332,22 +342,17 @@ src/modules/new-service/
 
 ```typescript
 // src/app.module.ts - Add to GrpcModule configuration
-GrpcModule.forRootAsync({
-    inject: [ConfigServiceApp],
-    useFactory: (_configService: ConfigServiceApp) => {
-        const services: GrpcServiceConfig[] = [
-            // ... existing services
-            {
-                name: 'New Service',
-                package: 'newservice',
-                protoPath: 'src/proto/services/new-service.proto',
-                port: 50053,  // ← Choose next available port
-                enabled: true,
-            },
-        ];
-        return { services };
-    },
-}),
+GrpcModule.forRoot({
+    services: [
+        // ... existing services
+        {
+            name: 'New Service',
+            package: 'newservice',
+            protoPath: 'src/proto/services/new-service.proto',
+            url: 'localhost:50054', // Choose next available port
+        },
+    ],
+});
 ```
 
 4. **Update Docker Configuration**
@@ -355,7 +360,7 @@ GrpcModule.forRootAsync({
 ```yaml
 # docker-compose.yml
 ports:
-    - '50053:50053' # ← Match the service port
+    - '50054:50054' # Match the service port
 ```
 
 5. **Add to App Module Imports**
@@ -368,7 +373,7 @@ imports: [
 ];
 ```
 
-The `@ecom-co/grpc` library will automatically handle service registration and management.
+The `@ecom-co/grpc` library will automatically handle service registration and management using the **GrpcStarter** for deferred initialization.
 
 ### Port Assignment Guidelines
 
