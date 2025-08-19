@@ -10,11 +10,11 @@ export class RabbitmqService {
 
     async sum(a: number, b: number) {
         return await this.amqpConnection.request<{ sum: number }>({
-            correlationId: uuidv4(),
             exchange: 'exchange1',
             payload: { a, b },
             routingKey: 'rpc-route',
             timeout: 5000,
+            correlationId: uuidv4(),
         });
     }
 }

@@ -16,8 +16,8 @@ import { RabbitmqService } from './rabbitmq.service';
             useFactory: (configService: ConfigServiceApp) => ({
                 channels: [
                     {
-                        default: true,
                         name: 'default',
+                        default: true,
                         prefetchCount: 10,
                     },
                 ],
@@ -31,18 +31,18 @@ import { RabbitmqService } from './rabbitmq.service';
                 ],
                 queues: [
                     {
-                        exchange: 'exchange1',
                         name: 'rpc-queue',
+                        exchange: 'exchange1',
                         routingKey: 'rpc-route',
                     },
                     {
-                        exchange: 'demo.exchange2',
                         name: 'rpc.demo.exchange2.rpc.routing.key',
+                        exchange: 'demo.exchange2',
                         routingKey: 'rpc.routing.key',
                     },
                     {
-                        exchange: 'demo.exchange2',
                         name: 'subscribe.queue',
+                        exchange: 'demo.exchange2',
                         routingKey: 'subscribe.routing.key',
                     },
                 ],

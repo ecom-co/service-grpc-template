@@ -41,7 +41,7 @@ export class UserService {
             statusCode: 201,
         });
 
-        this.logger.debug('User created successfully', { userId: result.id, userName: result.name });
+        this.logger.debug('User created successfully', { userName: result.name, userId: result.id });
 
         return data;
     }
@@ -56,10 +56,10 @@ export class UserService {
     }): Promise<ApiPaginatedResponseData<UserResponseDto>> {
         const [users, total] = await this.userRepository.findAndCount({
             select: {
-                createdAt: true,
                 id: true,
-                isActive: true,
                 name: true,
+                isActive: true,
+                createdAt: true,
                 updatedAt: true,
             },
             skip: (page - 1) * limit,
@@ -90,10 +90,10 @@ export class UserService {
     async findOne(id: string): Promise<ApiResponseData<UserResponseDto>> {
         const user = await this.userRepository.findOne({
             select: {
-                createdAt: true,
                 id: true,
-                isActive: true,
                 name: true,
+                isActive: true,
+                createdAt: true,
                 updatedAt: true,
             },
             where: { id },
@@ -115,18 +115,18 @@ export class UserService {
      */
     getServiceHealth() {
         return {
+            status: 'healthy',
             circuitBreaker: {
-                failureCount: 0,
                 state: 'CLOSED',
+                failureCount: 0,
                 successCount: 100,
             },
             cluster: {
-                nodeId: process.env.NODE_ID || 'user-service-01',
                 totalNodes: 1,
+                nodeId: process.env.NODE_ID || 'user-service-01',
             },
             service: 'user-service',
             services: 1,
-            status: 'healthy',
             timestamp: new Date().toISOString(),
         };
     }
@@ -141,8 +141,8 @@ export class UserService {
     } {
         return {
             activeConnections: 0,
-            nodeId: process.env.NODE_ID || 'user-service-01',
             totalNodes: 1,
+            nodeId: process.env.NODE_ID || 'user-service-01',
         };
     }
 
@@ -155,8 +155,8 @@ export class UserService {
         const startTime = process.uptime();
 
         return {
-            service: 'User Service',
             status: 'running',
+            service: 'User Service',
             uptime: startTime,
             version: '1.0.0',
         };
@@ -210,10 +210,10 @@ export class UserService {
         // This would typically discover services from service registry
         return [
             {
-                host: 'localhost',
                 name: 'User Service',
-                port: 50051,
                 status: 'healthy',
+                host: 'localhost',
+                port: 50051,
             },
         ];
     }

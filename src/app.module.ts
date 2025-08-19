@@ -21,15 +21,15 @@ import { AppService } from '@/app.service';
 
 const services = [
     {
-        enabled: true,
         name: 'User Service',
+        enabled: true,
         package: 'user',
         port: 50052,
         protoPath: 'src/proto/services/user.proto',
     },
     {
-        enabled: true,
         name: 'App Service',
+        enabled: true,
         package: 'app',
         port: 50053,
         protoPath: 'src/proto/app.proto',
@@ -42,6 +42,7 @@ const services = [
             imports: [ConfigModule],
             inject: [ConfigServiceApp],
             useFactory: (configService: ConfigServiceApp) => ({
+                type: 'postgres',
                 autoLoadEntities: true,
                 entities: [...CORE_ENTITIES],
                 extra: {
@@ -55,7 +56,6 @@ const services = [
                 retryAttempts: 10,
                 retryDelay: 3000,
                 synchronize: configService.isDevelopment,
-                type: 'postgres',
                 url: configService.databaseUrl,
             }),
         }),
@@ -64,9 +64,9 @@ const services = [
             useFactory: (config: ConfigServiceApp) => ({
                 clients: [
                     {
-                        connectionString: config.redisUrl,
                         name: 'default',
                         type: 'single',
+                        connectionString: config.redisUrl,
                     },
                 ],
             }),

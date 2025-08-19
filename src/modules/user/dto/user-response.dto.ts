@@ -9,6 +9,10 @@ export class UserResponseDto {
     @Expose()
     id: string;
 
+    @ApiProperty({ description: 'User name', example: 'John Doe' })
+    @Expose()
+    name: string;
+
     @ApiProperty({ description: 'User email', example: 'john@example.com' })
     @Expose()
     email: string;
@@ -16,10 +20,6 @@ export class UserResponseDto {
     @ApiProperty({ description: 'User is active', example: true })
     @Expose()
     isActive: boolean;
-
-    @ApiProperty({ description: 'User name', example: 'John Doe' })
-    @Expose()
-    name: string;
 
     @ApiProperty({ description: 'User creation date', example: '2024-01-01T00:00:00.000Z' })
     @Expose()

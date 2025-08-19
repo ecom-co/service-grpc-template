@@ -1,12 +1,6 @@
 import { EmailFieldOptional, StringFieldOptional } from '@ecom-co/utils';
 
 export class UpdateUserDto {
-    @EmailFieldOptional({
-        description: 'User email address',
-        toLowerCase: true,
-    })
-    email?: string;
-
     @StringFieldOptional({
         description: 'User full name',
         maxLength: 50,
@@ -14,4 +8,10 @@ export class UpdateUserDto {
         trim: true,
     })
     name?: string;
+
+    @EmailFieldOptional({
+        description: 'User email address',
+        toLowerCase: true,
+    })
+    email?: string;
 }
