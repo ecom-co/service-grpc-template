@@ -1,5 +1,6 @@
-import { OrmModule, User } from '@ecom-co/orm';
 import { Module } from '@nestjs/common';
+
+import { OrmModule, User } from '@ecom-co/orm';
 
 import { UserGrpcController } from './user.grpc.controller';
 import { UserService } from './user.service';

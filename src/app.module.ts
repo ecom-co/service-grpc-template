@@ -1,11 +1,15 @@
+import { APP_PIPE } from '@nestjs/core';
+
+import { Module } from '@nestjs/common';
+
+import { ConfigModule as NestConfigModule } from '@nestjs/config';
+
+import { filter, map } from 'lodash';
+
 import { ElasticsearchModule } from '@ecom-co/elasticsearch';
 import { GrpcModule, GrpcValidationPipe } from '@ecom-co/grpc';
 import { CORE_ENTITIES, OrmModule } from '@ecom-co/orm';
 import { RedisModule } from '@ecom-co/redis';
-import { Module } from '@nestjs/common';
-import { ConfigModule as NestConfigModule } from '@nestjs/config';
-import { APP_PIPE } from '@nestjs/core';
-import { filter, map } from 'lodash';
 
 import { ConfigModule } from '@/modules/config/config.module';
 import { ConfigServiceApp } from '@/modules/config/config.service';
@@ -17,18 +21,18 @@ import { AppService } from '@/app.service';
 
 const services = [
     {
+        enabled: true,
         name: 'User Service',
         package: 'user',
-        protoPath: 'src/proto/services/user.proto',
         port: 50052,
-        enabled: true,
+        protoPath: 'src/proto/services/user.proto',
     },
     {
+        enabled: true,
         name: 'App Service',
         package: 'app',
-        protoPath: 'src/proto/app.proto',
         port: 50053,
-        enabled: true,
+        protoPath: 'src/proto/app.proto',
     },
 ];
 @Module({
@@ -38,21 +42,21 @@ const services = [
             imports: [ConfigModule],
             inject: [ConfigServiceApp],
             useFactory: (configService: ConfigServiceApp) => ({
-                type: 'postgres',
-                url: configService.databaseUrl,
-                synchronize: configService.isDevelopment,
-                logging: configService.isDevelopment,
-                entities: [...CORE_ENTITIES],
                 autoLoadEntities: true,
-                health: true,
-                keepConnectionAlive: true,
-                retryAttempts: 10,
-                retryDelay: 3000,
+                entities: [...CORE_ENTITIES],
                 extra: {
-                    max: 10,
                     connectionTimeoutMillis: 5000,
                     idleTimeoutMillis: 30000,
+                    max: 10,
                 },
+                health: true,
+                keepConnectionAlive: true,
+                logging: configService.isDevelopment,
+                retryAttempts: 10,
+                retryDelay: 3000,
+                synchronize: configService.isDevelopment,
+                type: 'postgres',
+                url: configService.databaseUrl,
             }),
         }),
         RedisModule.forRootAsync({
@@ -60,9 +64,9 @@ const services = [
             useFactory: (config: ConfigServiceApp) => ({
                 clients: [
                     {
-                        type: 'single',
-                        name: 'default',
                         connectionString: config.redisUrl,
+                        name: 'default',
+                        type: 'single',
                     },
                 ],
             }),
@@ -71,15 +75,15 @@ const services = [
         ElasticsearchModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigServiceApp],
+            predeclare: ['analytics'],
             useFactory: (config: ConfigServiceApp) => ({
+                autoCreateIndices: true,
                 clients: [
                     { name: 'default', node: config.elasticsearchUrl },
                     { name: 'analytics', node: config.elasticsearchUrl },
                 ],
-                autoCreateIndices: true,
                 documents: [],
             }),
-            predeclare: ['analytics'],
         }),
         RabbitmqModule,
 
@@ -89,8 +93,8 @@ const services = [
                 (s) => ({
                     name: s.name,
                     package: s.package,
-                    protoPath: s.protoPath,
                     port: s.port,
+                    protoPath: s.protoPath,
                 }),
             ),
         }),

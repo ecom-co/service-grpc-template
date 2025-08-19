@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+
 import { ConfigService as NestConfigService } from '@nestjs/config';
 
 import { EnvironmentVariables } from '@/modules/config/config.validation';
@@ -8,12 +9,8 @@ export class ConfigServiceApp {
     constructor(private readonly configService: NestConfigService<EnvironmentVariables>) {}
 
     // Application Configuration
-    get nodeEnv(): string {
-        return this.configService.get('NODE_ENV');
-    }
-
-    get port(): number {
-        return this.configService.get('PORT');
+    get databaseUrl(): string | undefined {
+        return this.configService.get('DATABASE_URL');
     }
 
     get isDevelopment(): boolean {
@@ -24,8 +21,12 @@ export class ConfigServiceApp {
         return this.nodeEnv === 'production';
     }
 
-    get databaseUrl(): string | undefined {
-        return this.configService.get('DATABASE_URL');
+    get nodeEnv(): string {
+        return this.configService.get('NODE_ENV');
+    }
+
+    get port(): number {
+        return this.configService.get('PORT');
     }
 
     get redisUrl(): string {
@@ -38,6 +39,10 @@ export class ConfigServiceApp {
     }
 
     // Elasticsearch Configuration
+    get elasticsearchPassword(): string | undefined {
+        return this.configService.get('ELASTICSEARCH_PASSWORD');
+    }
+
     get elasticsearchUrl(): string {
         return this.configService.get('ELASTICSEARCH_URL');
     }
@@ -46,17 +51,13 @@ export class ConfigServiceApp {
         return this.configService.get('ELASTICSEARCH_USERNAME');
     }
 
-    get elasticsearchPassword(): string | undefined {
-        return this.configService.get('ELASTICSEARCH_PASSWORD');
-    }
-
     // gRPC Configuration
-    get grpcPort(): number {
-        return this.configService.get('GRPC_PORT', 50051);
-    }
-
     get grpcPackage(): string {
         return this.configService.get('GRPC_PACKAGE', 'app');
+    }
+
+    get grpcPort(): number {
+        return this.configService.get('GRPC_PORT', 50051);
     }
 
     get grpcProtoPath(): string {

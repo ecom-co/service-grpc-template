@@ -1,8 +1,10 @@
-import { GrpcNotFoundException, TraceOperation, MonitorPerformance, Cacheable } from '@ecom-co/grpc';
-import { BaseRepository, InjectRepository, User } from '@ecom-co/orm';
-import { ApiResponseData, ApiPaginatedResponseData, Paging } from '@ecom-co/utils';
 import { Injectable, Logger } from '@nestjs/common';
+
 import { map } from 'lodash';
+
+import { Cacheable, GrpcNotFoundException, MonitorPerformance, TraceOperation } from '@ecom-co/grpc';
+import { BaseRepository, InjectRepository, User } from '@ecom-co/orm';
+import { ApiPaginatedResponseData, ApiResponseData, Paging } from '@ecom-co/utils';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -17,12 +19,12 @@ export class UserService {
         private readonly userRepository: BaseRepository<User>,
     ) {}
 
+    @MonitorPerformance({ includeMemory: true, threshold: 500 })
     @TraceOperation({
-        operationName: 'user.create',
         includeArgs: true,
         includeResult: false,
+        operationName: 'user.create',
     })
-    @MonitorPerformance({ threshold: 500, includeMemory: true })
     async create(dto: CreateUserDto): Promise<ApiResponseData<UserResponseDto>> {
         const result = await this.userRepository.findOneOrCreate(
             {
@@ -40,23 +42,24 @@ export class UserService {
         });
 
         this.logger.debug('User created successfully', { userId: result.id, userName: result.name });
+
         return data;
     }
 
     // Cache for 60 seconds
     async findAll({
-        page,
         limit,
+        page,
     }: {
-        page: number;
         limit: number;
+        page: number;
     }): Promise<ApiPaginatedResponseData<UserResponseDto>> {
         const [users, total] = await this.userRepository.findAndCount({
             select: {
-                id: true,
-                name: true,
-                isActive: true,
                 createdAt: true,
+                id: true,
+                isActive: true,
+                name: true,
                 updatedAt: true,
             },
             skip: (page - 1) * limit,
@@ -64,36 +67,36 @@ export class UserService {
         });
 
         const paging = new Paging({
-            page,
-            limit,
-            total,
             currentPageSize: users.length,
+            limit,
+            page,
+            total,
         });
 
         return new ApiPaginatedResponseData<UserResponseDto>({
             data: map(users, (user) => new UserResponseDto(user)),
-            paging,
             message: 'Users retrieved successfully',
+            paging,
         });
     }
 
+    @Cacheable({ ttl: 300 }) // Cache for 5 minutes
+    @MonitorPerformance({ includeMemory: true, threshold: 200 })
     @TraceOperation({
-        operationName: 'user.findOne',
         includeArgs: true,
         includeResult: false,
+        operationName: 'user.findOne',
     })
-    @MonitorPerformance({ threshold: 200, includeMemory: true })
-    @Cacheable({ ttl: 300 }) // Cache for 5 minutes
     async findOne(id: string): Promise<ApiResponseData<UserResponseDto>> {
         const user = await this.userRepository.findOne({
-            where: { id },
             select: {
-                id: true,
-                name: true,
-                isActive: true,
                 createdAt: true,
+                id: true,
+                isActive: true,
+                name: true,
                 updatedAt: true,
             },
+            where: { id },
         });
 
         if (!user) {
@@ -112,25 +115,37 @@ export class UserService {
      */
     getServiceHealth() {
         return {
-            service: 'user-service',
-            status: 'healthy',
-            timestamp: new Date().toISOString(),
-            services: 1,
+            circuitBreaker: {
+                failureCount: 0,
+                state: 'CLOSED',
+                successCount: 100,
+            },
             cluster: {
                 nodeId: process.env.NODE_ID || 'user-service-01',
                 totalNodes: 1,
             },
-            circuitBreaker: {
-                state: 'CLOSED',
-                failureCount: 0,
-                successCount: 100,
-            },
+            service: 'user-service',
+            services: 1,
+            status: 'healthy',
+            timestamp: new Date().toISOString(),
         };
     }
 
     /**
      * Discover other service instances
      */
+    getClusterInfo(): {
+        activeConnections: number;
+        nodeId: string;
+        totalNodes: number;
+    } {
+        return {
+            activeConnections: 0,
+            nodeId: process.env.NODE_ID || 'user-service-01',
+            totalNodes: 1,
+        };
+    }
+
     getServiceStatus(): {
         service: string;
         status: string;
@@ -147,32 +162,8 @@ export class UserService {
         };
     }
 
-    getClusterInfo(): {
-        nodeId: string;
-        totalNodes: number;
-        activeConnections: number;
-    } {
-        return {
-            nodeId: process.env.NODE_ID || 'user-service-01',
-            totalNodes: 1,
-            activeConnections: 0,
-        };
-    }
-
-    discoverUserServices(): { name: string; host: string; port: number; status: string }[] {
-        // This would typically discover services from service registry
-        return [
-            {
-                name: 'User Service',
-                host: 'localhost',
-                port: 50051,
-                status: 'healthy',
-            },
-        ];
-    }
-
-    @TraceOperation({ operationName: 'user.update' })
     @MonitorPerformance({ threshold: 400 })
+    @TraceOperation({ operationName: 'user.update' })
     async update(id: string, dto: UpdateUserDto) {
         const user = await this.userRepository.findOne({
             where: { id },
@@ -207,11 +198,23 @@ export class UserService {
 
         return new ApiResponseData({
             data: {
-                success: true,
                 message: `User ${id} deleted successfully`,
+                success: true,
             },
             message: 'User deleted successfully',
             statusCode: 200,
         });
+    }
+
+    discoverUserServices(): { host: string; name: string; port: number; status: string }[] {
+        // This would typically discover services from service registry
+        return [
+            {
+                host: 'localhost',
+                name: 'User Service',
+                port: 50051,
+                status: 'healthy',
+            },
+        ];
     }
 }

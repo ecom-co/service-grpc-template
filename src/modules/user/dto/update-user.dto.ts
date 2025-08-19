@@ -1,17 +1,17 @@
-import { StringFieldOptional, EmailFieldOptional } from '@ecom-co/utils';
+import { EmailFieldOptional, StringFieldOptional } from '@ecom-co/utils';
 
 export class UpdateUserDto {
-    @StringFieldOptional({
-        minLength: 2,
-        maxLength: 50,
-        description: 'User full name',
-        trim: true,
-    })
-    name?: string;
-
     @EmailFieldOptional({
         description: 'User email address',
         toLowerCase: true,
     })
     email?: string;
+
+    @StringFieldOptional({
+        description: 'User full name',
+        maxLength: 50,
+        minLength: 2,
+        trim: true,
+    })
+    name?: string;
 }

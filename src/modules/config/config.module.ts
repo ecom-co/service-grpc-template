@@ -1,4 +1,5 @@
 import { Global, Module } from '@nestjs/common';
+
 import { ConfigModule as NestConfigModule } from '@nestjs/config';
 
 import { ConfigServiceApp } from '@/modules/config/config.service';
@@ -8,12 +9,12 @@ import { validate } from '@/modules/config/config.validation';
 @Module({
     imports: [
         NestConfigModule.forRoot({
-            isGlobal: true,
             envFilePath: '.env',
+            isGlobal: true,
             validate,
             validationOptions: {
-                allowUnknown: true,
                 abortEarly: true,
+                allowUnknown: true,
             },
         }),
     ],

@@ -1,10 +1,12 @@
 import { Controller } from '@nestjs/common';
+
 import { GrpcMethod } from '@nestjs/microservices';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { GetUserDto } from './dto/get-user.dto';
 import { ListUsersDto } from './dto/list-users.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+
 import { UserService } from './user.service';
 
 @Controller()
@@ -21,29 +23,19 @@ export class UserGrpcController {
         return await this.userService.findOne(data.id);
     }
 
-    @GrpcMethod('UserService', 'UpdateUser')
-    async updateUser(data: UpdateUserDto & { id: string }) {
-        const { id, ...updateData } = data;
-        return await this.userService.update(id, updateData);
-    }
-
-    @GrpcMethod('UserService', 'DeleteUser')
-    async deleteUser(data: GetUserDto) {
-        const result = await this.userService.remove(data.id);
-        // Map the delete response to match proto structure
-        return {
-            deleteData: result.data,
-            message: result.message,
-            statusCode: result.statusCode,
-        };
-    }
-
     @GrpcMethod('UserService', 'ListUsers')
     async listUsers(data: ListUsersDto) {
         return await this.userService.findAll({
-            page: data.page,
             limit: data.limit,
+            page: data.page,
         });
+    }
+
+    @GrpcMethod('UserService', 'UpdateUser')
+    async updateUser(data: UpdateUserDto & { id: string }) {
+        const { id, ...updateData } = data;
+
+        return await this.userService.update(id, updateData);
     }
 
     /**
@@ -52,5 +44,17 @@ export class UserGrpcController {
     @GrpcMethod('UserService', 'GetHealth')
     getHealth() {
         return this.userService.getServiceHealth();
+    }
+
+    @GrpcMethod('UserService', 'DeleteUser')
+    async deleteUser(data: GetUserDto) {
+        const result = await this.userService.remove(data.id);
+
+        // Map the delete response to match proto structure
+        return {
+            deleteData: result.data,
+            message: result.message,
+            statusCode: result.statusCode,
+        };
     }
 }
