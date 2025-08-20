@@ -3,7 +3,13 @@ import { NestFactory, Reflector } from '@nestjs/core';
 
 import { ClassSerializerInterceptor, Logger } from '@nestjs/common';
 
-import { GrpcExceptionFilter, GrpcStarter, GrpcValidationPipe } from '@ecom-co/grpc';
+import {
+    GrpcClientFactory,
+    GrpcConfigService,
+    GrpcExceptionFilter,
+    GrpcStarter,
+    GrpcValidationPipe,
+} from '@ecom-co/grpc';
 
 import { ConfigServiceApp } from '@/modules/config/config.service';
 
@@ -51,11 +57,24 @@ const bootstrap = async (): Promise<void> => {
     setImmediate(() => {
         void (async () => {
             try {
-                const grpcStarter = app.get(GrpcStarter); // Use class reference
+                // Get GrpcStarter and set app instance for hybrid microservices
+                const grpcStarter = app.get(GrpcStarter);
 
-                grpcStarter.setAppModule(AppModule);
+                grpcStarter.setApp(app);
+
+                // Start all gRPC services (connects to main app and starts listening)
                 await grpcStarter.start();
-                logger.log('gRPC services bootstrapped manually!');
+
+                // Initialize all gRPC clients if any
+                const configService = app.get(GrpcConfigService);
+                const clientConfigs = configService.getClientConfigs();
+
+                if (clientConfigs.length > 0) {
+                    await GrpcClientFactory.initializeClients(clientConfigs);
+                    logger.log(`Initialized ${clientConfigs.length} gRPC clients`);
+                }
+
+                logger.log('gRPC services bootstrapped successfully with hybrid architecture!');
             } catch (error) {
                 logger.error('Failed to start gRPC services:', error);
             }

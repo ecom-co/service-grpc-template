@@ -26,8 +26,8 @@ export class UserGrpcController {
     @GrpcMethod('UserService', 'ListUsers')
     async listUsers(data: ListUsersDto) {
         return await this.userService.findAll({
-            limit: data.limit,
-            page: data.page,
+            limit: data.limit || 10,
+            page: data.page || 1,
         });
     }
 
@@ -43,7 +43,12 @@ export class UserGrpcController {
      */
     @GrpcMethod('UserService', 'GetHealth')
     getHealth() {
-        return this.userService.getServiceHealth();
+        // Return a simple health status since getServiceHealth() method was removed
+        return {
+            status: 'healthy',
+            service: 'user-service',
+            timestamp: new Date().toISOString(),
+        };
     }
 
     @GrpcMethod('UserService', 'DeleteUser')

@@ -17,6 +17,9 @@ export class UserService {
     constructor(
         @InjectRepository(User)
         private readonly userRepository: BaseRepository<User>,
+        // Example: Inject gRPC clients if needed
+        // @GrpcClient('notification-client') private readonly notificationClient: ClientProxy,
+        // @GrpcClient('payment-client') private readonly paymentClient: ClientProxy,
     ) {}
 
     @MonitorPerformance({ includeMemory: true, threshold: 500 })
@@ -42,6 +45,9 @@ export class UserService {
         });
 
         this.logger.debug('User created successfully', { userName: result.name, userId: result.id });
+
+        // Example: Send notification after user creation
+        // await this.sendUserCreatedNotification(result);
 
         return data;
     }
@@ -73,6 +79,8 @@ export class UserService {
             total,
         });
 
+        this.logger.debug('Users retrieved successfully', { total, users });
+
         return new ApiPaginatedResponseData<UserResponseDto>({
             data: map(users, (user) => new UserResponseDto(user)),
             message: 'Users retrieved successfully',
@@ -100,110 +108,141 @@ export class UserService {
         });
 
         if (!user) {
-            throw new GrpcNotFoundException('User not found');
+            throw new GrpcNotFoundException(`User with ID ${id} not found`);
         }
 
-        return new ApiResponseData({
+        const data = new ApiResponseData({
             data: new UserResponseDto(user),
             message: 'User retrieved successfully',
             statusCode: 200,
         });
+
+        this.logger.debug('User retrieved successfully', { userId: id });
+
+        return data;
     }
 
-    /**
-     * Get service health status with enhanced monitoring
-     */
-    getServiceHealth() {
-        return {
-            status: 'healthy',
-            circuitBreaker: {
-                state: 'CLOSED',
-                failureCount: 0,
-                successCount: 100,
-            },
-            cluster: {
-                totalNodes: 1,
-                nodeId: process.env.NODE_ID || 'user-service-01',
-            },
-            service: 'user-service',
-            services: 1,
-            timestamp: new Date().toISOString(),
-        };
+    // Example method showing how to use gRPC clients with the new architecture
+    // Uncomment and modify if you need to call other services
+    /*
+    async getUserWithExternalData(userId: string): Promise<ApiResponseData<any>> {
+        const user = await this.findOne(userId);
+        
+        try {
+            // Example: Get notification preferences
+            const notificationService = this.notificationClient.getService<any>('NotificationService');
+            const notificationPrefs = await firstValueFrom(
+                notificationService.GetUserPreferences({ userId })
+            );
+            
+            // Example: Get payment methods
+            const paymentService = this.paymentClient.getService<any>('PaymentService');
+            const paymentMethods = await firstValueFrom(
+                paymentService.GetUserPaymentMethods({ userId })
+            );
+            
+            return new ApiResponseData({
+                data: {
+                    user: user.data,
+                    notificationPreferences: notificationPrefs,
+                    paymentMethods: paymentMethods
+                },
+                message: 'User with external data retrieved successfully',
+                statusCode: 200,
+            });
+        } catch (error) {
+            this.logger.error('Failed to get external data for user', { userId, error });
+            
+            // Return user data only if external services fail
+            return new ApiResponseData({
+                data: {
+                    user: user.data,
+                    notificationPreferences: null,
+                    paymentMethods: null
+                },
+                message: 'User retrieved successfully (external services unavailable)',
+                statusCode: 200,
+            });
+        }
     }
 
-    /**
-     * Discover other service instances
-     */
-    getClusterInfo(): {
-        activeConnections: number;
-        nodeId: string;
-        totalNodes: number;
-    } {
-        return {
-            activeConnections: 0,
-            totalNodes: 1,
-            nodeId: process.env.NODE_ID || 'user-service-01',
-        };
+    // Example: Send notification after user creation
+    private async sendUserCreatedNotification(user: User): Promise<void> {
+        try {
+            const notificationService = this.notificationClient.getService<any>('NotificationService');
+            await firstValueFrom(
+                notificationService.SendWelcomeEmail({ 
+                    userId: user.id, 
+                    userName: user.name,
+                    email: user.email 
+                })
+            );
+            
+            this.logger.debug('Welcome notification sent successfully', { userId: user.id });
+        } catch (error) {
+            this.logger.error('Failed to send welcome notification', { userId: user.id, error });
+            // Don't throw - notification failure shouldn't break user creation
+        }
     }
+    */
 
-    getServiceStatus(): {
-        service: string;
-        status: string;
-        uptime: number;
-        version?: string;
-    } {
-        const startTime = process.uptime();
-
-        return {
-            status: 'running',
-            service: 'User Service',
-            uptime: startTime,
-            version: '1.0.0',
-        };
-    }
-
-    @MonitorPerformance({ threshold: 400 })
-    @TraceOperation({ operationName: 'user.update' })
-    async update(id: string, dto: UpdateUserDto) {
+    @MonitorPerformance({ includeMemory: true, threshold: 500 })
+    @TraceOperation({
+        includeArgs: true,
+        includeResult: false,
+        operationName: 'user.update',
+    })
+    async update(id: string, dto: UpdateUserDto): Promise<ApiResponseData<UserResponseDto>> {
         const user = await this.userRepository.findOne({
             where: { id },
         });
 
         if (!user) {
-            throw new GrpcNotFoundException('User not found');
+            throw new GrpcNotFoundException(`User with ID ${id} not found`);
         }
 
-        const updatedUser = await this.userRepository.save({
+        const result = await this.userRepository.save({
             ...user,
             ...dto,
         });
 
-        return new ApiResponseData({
-            data: new UserResponseDto(updatedUser),
+        const data = new ApiResponseData({
+            data: new UserResponseDto(result),
             message: 'User updated successfully',
             statusCode: 200,
         });
+
+        this.logger.debug('User updated successfully', { userName: result.name, userId: id });
+
+        return data;
     }
 
-    async remove(id: string) {
+    @MonitorPerformance({ includeMemory: true, threshold: 500 })
+    @TraceOperation({
+        includeArgs: true,
+        includeResult: false,
+        operationName: 'user.remove',
+    })
+    async remove(id: string): Promise<ApiResponseData<UserResponseDto>> {
         const user = await this.userRepository.findOne({
             where: { id },
         });
 
         if (!user) {
-            throw new GrpcNotFoundException('User not found');
+            throw new GrpcNotFoundException(`User with ID ${id} not found`);
         }
 
         await this.userRepository.remove(user);
 
-        return new ApiResponseData({
-            data: {
-                message: `User ${id} deleted successfully`,
-                success: true,
-            },
-            message: 'User deleted successfully',
+        const data = new ApiResponseData({
+            data: new UserResponseDto(user),
+            message: 'User removed successfully',
             statusCode: 200,
         });
+
+        this.logger.debug('User removed successfully', { userName: user.name, userId: id });
+
+        return data;
     }
 
     discoverUserServices(): { host: string; name: string; port: number; status: string }[] {
