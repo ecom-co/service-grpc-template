@@ -3,6 +3,7 @@
 import { createNestJSConfig } from '@ecom-co/eslint/nestjs';
 
 export default createNestJSConfig({
+  functionStyle: 'arrow',
   tsconfigRootDir: import.meta.dirname,
   project: './tsconfig.json',
   

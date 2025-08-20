@@ -58,12 +58,12 @@
         }
     },
     "dependencies": {
-        "@ecom-co/elasticsearch": "^0.1.16",
+        "@ecom-co/elasticsearch": "^0.1.18",
         "@ecom-co/grpc": "^1.0.11",
-        "@ecom-co/orm": "^0.1.20",
-        "@ecom-co/rabbitmq": "^2.0.10",
-        "@ecom-co/redis": "^0.1.9",
-        "@ecom-co/utils": "^1.0.19",
+        "@ecom-co/orm": "^0.1.22",
+        "@ecom-co/rabbitmq": "^2.0.12",
+        "@ecom-co/redis": "^0.1.13",
+        "@ecom-co/utils": "^1.0.20",
         "@elastic/elasticsearch": "^8.19.0",
         "@grpc/grpc-js": "^1.13.4",
         "@grpc/proto-loader": "^0.7.5",
@@ -83,7 +83,7 @@
     "devDependencies": {
         "@commitlint/cli": "^19.8.1",
         "@commitlint/config-conventional": "^19.8.1",
-        "@ecom-co/eslint": "^2.1.13",
+        "@ecom-co/eslint": "^2.1.16",
         "@nestjs/cli": "^11.0.0",
         "@nestjs/schematics": "^11.0.0",
         "@nestjs/testing": "^11.0.1",
