@@ -1,470 +1,279 @@
-# E-commerce Platform - gRPC Template
+# Template with New gRPC Architecture
 
-A scalable microservices template built with NestJS, gRPC, and the `@ecom-co/grpc` library for e-commerce applications.
+This template demonstrates how to use the new `@ecom-co/grpc` library with hybrid architecture, centralized configuration, and type-safe discriminated union types.
 
-## 🚀 Features
+## 🚀 Key Features Applied
 
-- **gRPC Communication**: High-performance RPC framework for microservices
-- **NestJS Framework**: Modern Node.js framework with TypeScript support
-- **Microservices Architecture**: Scalable service-based architecture
-- **TypeORM Integration**: Database ORM with PostgreSQL support
-- **Validation**: Request validation using class-validator and `@ecom-co/grpc` validation pipes
-- **gRPC Exception Handling**: Advanced error handling with `@ecom-co/grpc` filters
-- **Standardized gRPC Library**: Using `@ecom-co/grpc` for service management and utilities
-- **Docker Support**: Containerized development and production environments
-- **Dynamic Service Configuration**: Service management using `@ecom-co/grpc` module
+### ✅ **Hybrid Architecture**
 
-## 📋 Prerequisites
+- Single app instance for HTTP + gRPC services
+- No separate microservice instances
+- Unified lifecycle management
 
-- Node.js 18+
-- Docker & Docker Compose
-- PostgreSQL
-- Redis
-- RabbitMQ
-- Elasticsearch
+### ✅ **Centralized Configuration**
 
-## 🛠️ Installation
+- `GrpcConfigService` manages all configurations and runtime state
+- Single source of truth for server/client configs
+- Type-safe discriminated union types
 
-1. **Clone the repository**
+### ✅ **Auto-Uppercase Naming**
 
-```bash
-git clone <repository-url>
-cd template
-```
+- All service and client names automatically normalized
+- Prevents case-related errors
+- Consistent naming across the application
 
-2. **Install dependencies**
-
-```bash
-npm install
-```
-
-3. **Environment setup**
-
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
-
-4. **Start external services**
-
-```bash
-# Start PostgreSQL, Redis, RabbitMQ, Elasticsearch
-docker-compose up -d postgres redis rabbitmq elasticsearch
-```
-
-## 🏗️ Architecture
-
-### Service Structure
+## 📁 Project Structure
 
 ```
 src/
+├── app.module.ts              # Main module with gRPC configs
+├── main.ts                    # Bootstrap with hybrid architecture
 ├── modules/
-│   ├── user/           # User Service
-│   │   ├── dto/        # Data Transfer Objects
-│   │   ├── user.grpc.controller.ts
-│   │   ├── user.service.ts
-│   │   └── user.module.ts
-│   └── config/         # Configuration Service
-├── proto/
-│   └── services/
-│       └── user.proto  # gRPC Protocol Buffers
-└── main.ts            # Application entry point with @ecom-co/grpc bootstrapper
-```
-
-### Port Configuration
-
-| Service              | Port  | Description                  |
-| -------------------- | ----- | ---------------------------- |
-| User Service         | 50052 | User management operations   |
-| App Service          | 50053 | Application service          |
-| Product Service      | 50054 | Product catalog (planned)    |
-| Order Service        | 50055 | Order processing (planned)   |
-| Payment Service      | 50056 | Payment processing (planned) |
-| Notification Service | 50057 | Notifications (planned)      |
-
-**Important Notes:**
-
-- **Port 50051**: Reserved for main backend application (avoid conflicts)
-- **Port Range 50052-50060**: Available for microservices in this template
-- **Dynamic Port Assignment**: Services automatically get next available port
-
-### Port Conflict Resolution
-
-If you encounter port conflicts:
-
-1. **Check running services:**
-
-```bash
-# Check what's using port 50052
-lsof -i :50052
-# or
-netstat -tulpn | grep 50052
-```
-
-2. **Change service port in app.module.ts:**
-
-```typescript
-// src/app.module.ts - GrpcModule configuration
-GrpcModule.forRoot({
-    services: [
-        {
-            name: 'User Service',
-            package: 'user',
-            protoPath: 'src/proto/services/user.proto',
-            url: 'localhost:50054', // Change to available port
-        },
-    ],
-});
-```
-
-3. **Update Docker configuration:**
-
-```yaml
-# docker-compose.yml
-ports:
-    - '50053:50053' # Match the new port
-```
-
-4. **Update environment variables:**
-
-```env
-# .env
-GRPC_PORT=50053
-```
-
-### Port Management Strategy
-
-- **Development**: Use ports 50052-50060 for template services
-- **Production**: Use environment-specific port ranges
-- **Scaling**: Each service gets its own port for independent scaling
-
-## 🚀 Running the Application
-
-### Development Mode
-
-```bash
-npm run start:dev
-```
-
-**Expected output:**
-
-```
-[Nest] 78921  - 08/18/2025, 3:10:43 AM     LOG [Bootstrap] Application started successfully!
-[Nest] 78921  - 08/18/2025, 3:10:43 AM     LOG [GrpcServiceManager] gRPC server created for User Service at localhost:50052
-[Nest] 78921  - 08/18/2025, 3:10:43 AM     LOG [GrpcServiceManager] Service 'User Service' started at localhost:50052
-[Nest] 78921  - 08/18/2025, 3:10:43 AM     LOG [GrpcServiceManager] gRPC server created for App Service at localhost:50053
-[Nest] 78921  - 08/18/2025, 3:10:43 AM     LOG [GrpcServiceManager] Service 'App Service' started at localhost:50053
-[Nest] 78921  - 08/18/2025, 3:10:43 AM     LOG [GrpcServiceManager] Successfully started 2 gRPC services
-[Nest] 78921  - 08/18/2025, 3:10:43 AM     LOG [Bootstrap] gRPC services bootstrapped manually!
-```
-
-### Production Mode
-
-```bash
-npm run build
-npm run start:prod
-```
-
-### Docker
-
-```bash
-# Development
-docker-compose up api
-
-# Production
-docker build -t ecom-api .
-docker run -p 50052:50052 ecom-api
-```
-
-## 📡 gRPC Services
-
-### User Service (Port 50052)
-
-#### Available Methods:
-
-- `CreateUser(CreateUserRequest) → UserResponse`
-- `GetUser(GetUserRequest) → UserResponse`
-- `UpdateUser(UpdateUserRequest) → UserResponse`
-- `DeleteUser(DeleteUserRequest) → DeleteUserResponse`
-- `ListUsers(ListUsersRequest) → ListUsersResponse`
-
-#### Request Examples:
-
-**Create User:**
-
-```protobuf
-message CreateUserRequest {
-  string name = 1;
-  string email = 2;
-  string password = 3;
-}
-```
-
-**List Users:**
-
-```protobuf
-message ListUsersRequest {
-  int32 page = 1;
-  int32 limit = 2;
-}
-```
-
-## 🧪 Testing
-
-### gRPC Client Test
-
-```bash
-# Create a test client (example)
-node test-grpc-client.js
-```
-
-### Unit Tests
-
-```bash
-npm run test
-```
-
-### E2E Tests
-
-```bash
-npm run test:e2e
+│   ├── user/
+│   │   ├── user.module.ts     # Feature module (can use gRPC clients)
+│   │   ├── user.service.ts    # Service with decorators & client examples
+│   │   └── user.grpc.controller.ts
+│   └── config/
+└── proto/                     # Protocol buffer definitions
 ```
 
 ## 🔧 Configuration
 
-### Environment Variables
-
-```env
-# Database
-DATABASE_URL=postgresql://user:password@localhost:5432/dbname
-
-# Redis
-REDIS_URL=redis://localhost:6379
-
-# Elasticsearch
-ELASTICSEARCH_URL=http://localhost:9200
-
-# gRPC Configuration
-GRPC_PORT=50052                    # Service port (change if conflict)
-GRPC_PACKAGE=user                  # Proto package name
-GRPC_PROTO_PATH=src/proto/services/user.proto
-
-# RabbitMQ
-RABBITMQ_URL=amqp://localhost:5672
-
-# Service Management
-SERVICE_ENABLED=true               # Enable/disable services
-SERVICE_PORT_RANGE_START=50052     # Start of port range
-SERVICE_PORT_RANGE_END=50060       # End of port range
-```
-
-### Port Configuration Files
-
-**Service Registry** (`src/app.module.ts`):
+### **App Module Setup**
 
 ```typescript
-// Configuration using GrpcModule.forRoot
-GrpcModule.forRoot({
-    services: [
-        {
-            name: 'User Service',
-            package: 'user',
-            protoPath: 'src/proto/services/user.proto',
-            url: 'localhost:50052', // Change this if port is in use
-        },
+// app.module.ts
+const configs: GrpcConfig[] = [
+    // Server configurations
+    {
+        name: 'user-service',
+        type: 'server',
+        package: 'user',
+        port: 50052,
+        protoPath: 'src/proto/services/user.proto',
+        host: '0.0.0.0',
+    },
+    {
+        name: 'app-service',
+        type: 'server',
+        package: 'app',
+        port: 50053,
+        protoPath: 'src/proto/app.proto',
+        host: '0.0.0.0',
+    },
+    // Client configurations (example)
+    // {
+    //     name: 'notification-client',
+    //     type: 'client',
+    //     package: 'notification',
+    //     protoPath: 'src/proto/services/notification.proto',
+    //     url: 'localhost:50054'
+    // }
+];
+
+@Module({
+    imports: [
+        GrpcModule.forRoot({
+            configs: filter(configs, (c) => c.type === 'server'),
+        }),
+        // ... other modules
     ],
-});
+})
+export class AppModule {}
 ```
 
-**Docker Configuration** (`docker-compose.yml`):
-
-```yaml
-ports:
-    - '50052:50052' # ← Must match service port
-```
-
-**Health Check**:
-
-```yaml
-healthcheck:
-    test: ['CMD', 'nc', '-z', 'localhost', '50052'] # ← Must match service port
-```
-
-### Service Configuration
-
-Services are configured in `src/app.module.ts` using `@ecom-co/grpc`:
+### **Bootstrap with Hybrid Architecture**
 
 ```typescript
-// src/app.module.ts
-GrpcModule.forRoot({
-    services: [
-        {
-            name: 'User Service',
-            package: 'user',
-            protoPath: 'src/proto/services/user.proto',
-            url: 'localhost:50052',
-        },
-        {
-            name: 'App Service',
-            package: 'app',
-            protoPath: 'src/proto/app.proto',
-            url: 'localhost:50053',
-        },
-    ],
-});
+// main.ts
+const bootstrap = async (): Promise<void> => {
+    const app = await NestFactory.create(AppModule);
+
+    // Set app instance for hybrid microservices
+    const grpcStarter = app.get(GrpcStarter);
+    grpcStarter.setApp(app);
+
+    // Start all gRPC services (connects to main app)
+    grpcStarter.start();
+
+    // Initialize gRPC clients if any
+    const configService = app.get(GrpcConfigService);
+    const clientConfigs = configService.getClientConfigs();
+
+    if (clientConfigs.length > 0) {
+        await GrpcClientFactory.initializeClients(clientConfigs);
+    }
+
+    await app.listen(3000);
+};
 ```
 
-## 📦 Adding New Services
+## 🎯 Using gRPC Clients in Feature Modules
 
-1. **Create Proto File**
+### **1. Import GrpcClientModule in Feature Module**
 
-```protobuf
-// src/proto/services/new-service.proto
-syntax = "proto3";
-package newservice;
+```typescript
+// user/user.module.ts
+import { Module } from '@nestjs/common';
+import { GrpcClientModule } from '@ecom-co/grpc';
 
-service NewService {
-  rpc MethodName (Request) returns (Response) {}
+@Module({
+    imports: [
+        OrmModule.forFeatureExtended([User]),
+        // REQUIRED: Create providers for clients you want to use
+        GrpcClientModule.forFeature(['notification-client', 'payment-client']),
+    ],
+    controllers: [UserGrpcController],
+    providers: [UserService],
+    exports: [UserService],
+})
+export class UserModule {}
+```
+
+### **2. Inject Clients in Service**
+
+```typescript
+// user/user.service.ts
+import { Injectable } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
+import { GrpcClient } from '@ecom-co/grpc';
+
+@Injectable()
+export class UserService {
+    constructor(
+        @InjectRepository(User)
+        private readonly userRepository: BaseRepository<User>,
+        // Inject gRPC clients (auto-uppercase: 'notification-client' → 'NOTIFICATION-CLIENT')
+        @GrpcClient('notification-client') private readonly notificationClient: ClientProxy,
+        @GrpcClient('payment-client') private readonly paymentClient: ClientProxy,
+    ) {}
+
+    async getUserWithExternalData(userId: string) {
+        const user = await this.findOne(userId);
+
+        try {
+            // Call notification service
+            const notificationService = this.notificationClient.getService<any>('NotificationService');
+            const notificationPrefs = await firstValueFrom(notificationService.GetUserPreferences({ userId }));
+
+            // Call payment service
+            const paymentService = this.paymentClient.getService<any>('PaymentService');
+            const paymentMethods = await firstValueFrom(paymentService.GetUserPaymentMethods({ userId }));
+
+            return {
+                user: user.data,
+                notificationPreferences: notificationPrefs,
+                paymentMethods: paymentMethods,
+            };
+        } catch (error) {
+            this.logger.error('Failed to get external data', { userId, error });
+            return { user: user.data };
+        }
+    }
 }
 ```
 
-2. **Create Module Structure**
+## 🎨 Using Decorators
 
-```
-src/modules/new-service/
-├── dto/
-├── new-service.grpc.controller.ts
-├── new-service.service.ts
-└── new-service.module.ts
-```
-
-3. **Register Service in App Module**
+The template includes examples of all available decorators:
 
 ```typescript
-// src/app.module.ts - Add to GrpcModule configuration
-GrpcModule.forRoot({
-    services: [
-        // ... existing services
-        {
-            name: 'New Service',
-            package: 'newservice',
-            protoPath: 'src/proto/services/new-service.proto',
-            url: 'localhost:50054', // Choose next available port
-        },
-    ],
-});
+@Injectable()
+export class UserService {
+    // Performance monitoring
+    @MonitorPerformance({ includeMemory: true, threshold: 500 })
+    @TraceOperation({
+        includeArgs: true,
+        includeResult: false,
+        operationName: 'user.create',
+    })
+    async create(dto: CreateUserDto) {
+        // Method implementation
+    }
+
+    // Method result caching
+    @Cacheable({ ttl: 300 }) // Cache for 5 minutes
+    async findAll() {
+        // Expensive operation
+    }
+
+    // All-in-one decorator
+    @EnhancedOperation({
+        operationName: 'createUser',
+        cacheEnabled: true,
+        cacheTtl: 600,
+        performanceThreshold: 2000,
+        includeArgs: true,
+    })
+    async createUser(userData: any) {
+        // Auto: tracing + performance + caching
+    }
+}
 ```
 
-4. **Update Docker Configuration**
-
-```yaml
-# docker-compose.yml
-ports:
-    - '50054:50054' # Match the service port
-```
-
-5. **Add to App Module Imports**
+## 🔍 Centralized Configuration Access
 
 ```typescript
-// src/app.module.ts
-imports: [
-    // ... other imports
-    NewServiceModule,
-];
+@Injectable()
+export class MyService {
+    constructor(private readonly configService: GrpcConfigService) {}
+
+    async someMethod() {
+        // Get configurations
+        const allConfigs = this.configService.getConfigs();
+        const serverConfigs = this.configService.getServerConfigs();
+        const clientConfigs = this.configService.getClientConfigs();
+
+        // Get runtime state
+        const runningServices = this.configService.getRunningServicesList();
+        const usedPorts = this.configService.getUsedPorts();
+        const isServiceRunning = this.configService.isServiceRunning('USER-SERVICE');
+
+        // Get configuration options
+        const basePort = this.configService.getBasePort();
+        const host = this.configService.getHost();
+        const isDev = this.configService.isDevelopment();
+    }
+}
 ```
 
-The `@ecom-co/grpc` library will automatically handle service registration and management using the **GrpcStarter** for deferred initialization.
+## 🚀 Getting Started
 
-### Port Assignment Guidelines
+1. **Install dependencies**:
 
-- **Check available ports**: Use `lsof -i :PORT` to verify
-- **Sequential assignment**: 50052, 50053, 50054, etc.
-- **Document port usage**: Update this README when adding services
-- **Environment-specific**: Use different port ranges for dev/staging/prod
+    ```bash
+    npm install
+    ```
 
-## 🔍 Monitoring & Debugging
+2. **Configure gRPC services** in `app.module.ts`
 
-### Health Checks
+3. **Add client configurations** if needed
 
-- **gRPC Health**: `nc -z localhost 50052` (check if port is listening)
-- **Docker Health**: Configured in docker-compose.yml
-- **Port Status**: `lsof -i :50052` (check what's using the port)
+4. **Import GrpcClientModule** in feature modules that use clients
 
-### Troubleshooting Port Issues
+5. **Inject clients** using `@GrpcClient()` decorator
 
-**Common Port Problems:**
+6. **Start the application**:
+    ```bash
+    npm run start:dev
+    ```
 
-1. **Port already in use**: Change port in GrpcModule configuration
-2. **Docker port conflict**: Update docker-compose.yml
-3. **Health check failing**: Verify port is correctly configured in app.module.ts
+## 📊 Benefits
 
-**Debug Commands:**
+- **Type Safety**: Discriminated union types prevent configuration errors
+- **Hybrid Architecture**: Single app instance, no conflicts
+- **Auto-Uppercase**: Consistent naming prevents errors
+- **Centralized Config**: Single source of truth for all configurations
+- **Clean Injection**: Simple `@GrpcClient()` decorator for client injection
+- **Production Ready**: Built-in monitoring, tracing, and caching
 
-```bash
-# Check what's using a port
-lsof -i :50052
+## 🔧 Migration from Old Architecture
 
-# Check if service is listening
-netstat -tulpn | grep 50052
+The template shows the complete migration from the old architecture to the new one:
 
-# Test gRPC connection
-nc -z localhost 50052
-
-# Check Docker container ports
-docker ps
-docker port <container-id>
-```
-
-### Logs
-
-```bash
-# Application logs
-npm run start:dev
-
-# Docker logs
-docker-compose logs api
-```
-
-## 📚 Dependencies
-
-### Core Dependencies
-
-- `@nestjs/common`: NestJS core framework
-- `@nestjs/microservices`: gRPC microservices support
-- `@grpc/grpc-js`: gRPC implementation
-- `@grpc/proto-loader`: Protocol buffer loader
-- `class-validator`: Request validation
-- `class-transformer`: Data transformation
-
-### Custom Dependencies
-
-- `@ecom-co/grpc`: gRPC service management, validation, and utilities
-- `@ecom-co/orm`: TypeORM integration
-- `@ecom-co/redis`: Redis integration
-- `@ecom-co/elasticsearch`: Elasticsearch integration
-- `@ecom-co/utils`: Utility library with decorators and DTOs
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 🆘 Support
-
-For support and questions:
-
-- Create an issue in the repository
-- Contact the development team
-- Check the documentation
-
----
-
-**Happy coding! 🚀**
-test
+- ✅ Updated `app.module.ts` with discriminated union types
+- ✅ Updated `main.ts` with hybrid bootstrap
+- ✅ Added examples for client usage in feature modules
+- ✅ Maintained all existing functionality
+- ✅ Added comprehensive error handling examples
