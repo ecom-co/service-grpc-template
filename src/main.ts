@@ -25,7 +25,7 @@ const bootstrap = async (): Promise<void> => {
     });
 
     // Get config service
-    const _configService = app.get(ConfigServiceApp);
+    const configService = app.get(ConfigServiceApp);
 
     // Use custom gRPC validation pipe
     app.useGlobalPipes(new GrpcValidationPipe());
@@ -39,7 +39,7 @@ const bootstrap = async (): Promise<void> => {
         enableLogging: true,
         enableMetrics: true,
         errorRateLimit: 10, // New - 10 errors/minute
-        isDevelopment: false,
+        isDevelopment: configService.isDevelopment,
         maxDetailsSize: 1000, // New - 1KB limit
         rateLimitWindowMs: 60000, // New - 1 minute window
     });

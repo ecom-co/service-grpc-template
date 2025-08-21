@@ -18,6 +18,19 @@ export class UserGrpcController {
         return await this.userService.create(data);
     }
 
+    /**
+     * Enhanced gRPC methods using scale features
+     */
+    @GrpcMethod('UserService', 'GetHealth')
+    getHealth() {
+        // Return a simple health status since getServiceHealth() method was removed
+        return {
+            status: 'healthy',
+            service: 'user-service',
+            timestamp: new Date().toISOString(),
+        };
+    }
+
     @GrpcMethod('UserService', 'GetUser')
     async getUser(data: GetUserDto) {
         return await this.userService.findOne(data.id);
@@ -36,19 +49,6 @@ export class UserGrpcController {
         const { id, ...updateData } = data;
 
         return await this.userService.update(id, updateData);
-    }
-
-    /**
-     * Enhanced gRPC methods using scale features
-     */
-    @GrpcMethod('UserService', 'GetHealth')
-    getHealth() {
-        // Return a simple health status since getServiceHealth() method was removed
-        return {
-            status: 'healthy',
-            service: 'user-service',
-            timestamp: new Date().toISOString(),
-        };
     }
 
     @GrpcMethod('UserService', 'DeleteUser')
