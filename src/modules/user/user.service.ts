@@ -79,7 +79,7 @@ export class UserService {
             total,
         });
 
-        this.logger.debug('Users retrieved successfully', { total, users });
+        this.logger.debug('Paging', { paging });
 
         return new ApiPaginatedResponseData<UserResponseDto>({
             data: map(users, (user) => new UserResponseDto(user)),
@@ -118,6 +118,37 @@ export class UserService {
         });
 
         this.logger.debug('User retrieved successfully', { userId: id });
+
+        return data;
+    }
+
+    @MonitorPerformance({ includeMemory: true, threshold: 500 })
+    @TraceOperation({
+        includeArgs: true,
+        includeResult: false,
+        operationName: 'user.update',
+    })
+    async update(id: string, dto: UpdateUserDto): Promise<ApiResponseData<UserResponseDto>> {
+        const user = await this.userRepository.findOne({
+            where: { id },
+        });
+
+        if (!user) {
+            throw new GrpcNotFoundException(`User with ID ${id} not found`);
+        }
+
+        const result = await this.userRepository.save({
+            ...user,
+            ...dto,
+        });
+
+        const data = new ApiResponseData({
+            data: new UserResponseDto(result),
+            message: 'User updated successfully',
+            statusCode: 200,
+        });
+
+        this.logger.debug('User updated successfully', { userName: result.name, userId: id });
 
         return data;
     }
@@ -186,37 +217,11 @@ export class UserService {
     }
     */
 
-    @MonitorPerformance({ includeMemory: true, threshold: 500 })
-    @TraceOperation({
-        includeArgs: true,
-        includeResult: false,
-        operationName: 'user.update',
-    })
-    async update(id: string, dto: UpdateUserDto): Promise<ApiResponseData<UserResponseDto>> {
-        const user = await this.userRepository.findOne({
-            where: { id },
-        });
-
-        if (!user) {
-            throw new GrpcNotFoundException(`User with ID ${id} not found`);
-        }
-
-        const result = await this.userRepository.save({
-            ...user,
-            ...dto,
-        });
-
-        const data = new ApiResponseData({
-            data: new UserResponseDto(result),
-            message: 'User updated successfully',
-            statusCode: 200,
-        });
-
-        this.logger.debug('User updated successfully', { userName: result.name, userId: id });
-
-        return data;
-    }
-
+    /**
+     *
+     * @param {string} id - The ID of the user to remove
+     * @returns {ApiResponseData<UserResponseDto>} - The response data
+     */
     @MonitorPerformance({ includeMemory: true, threshold: 500 })
     @TraceOperation({
         includeArgs: true,

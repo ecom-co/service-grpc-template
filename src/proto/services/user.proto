@@ -57,12 +57,17 @@ message ApiResponseData {
   int32 statusCode = 4;
 }
 
-// Paging information
 message Paging {
   int32 page = 1;
   int32 limit = 2;
   int32 total = 3;
-  int32 currentPageSize = 4;
+  int32 totalPages = 4;
+  int32 currentPageSize = 5;
+  int32 startItem = 6;
+  int32 endItem = 7;
+  bool hasNextPage = 8;
+  bool hasPreviousPage = 9;
+  int32 firstPage = 10;
 }
 
 // API Response wrapper for paginated operations
