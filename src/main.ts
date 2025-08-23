@@ -7,6 +7,8 @@ import { Logger } from '@nestjs/common';
 import { GrpcExceptionFilter, GrpcLoggingInterceptor, GrpcValidationPipe } from '@ecom-co/grpc';
 import { type MicroserviceOptions, Transport } from '@nestjs/microservices';
 
+import { ConfigServiceApp } from '@/modules/config/config.service';
+
 import { AppModule } from '@/app.module';
 
 /**
@@ -24,6 +26,7 @@ const bootstrap = async (): Promise<void> => {
             },
             transport: Transport.GRPC,
         });
+        const configServiceApp = app.get(ConfigServiceApp);
 
         app.useGlobalPipes(
             new GrpcValidationPipe({
@@ -42,9 +45,9 @@ const bootstrap = async (): Promise<void> => {
 
         app.useGlobalInterceptors(
             new GrpcLoggingInterceptor(reflector, {
-                isDevelopment: true,
-                logRequest: true,
-                logResponse: true,
+                isDevelopment: configServiceApp.isDevelopment,
+                logRequest: configServiceApp.isDevelopment,
+                logResponse: configServiceApp.isDevelopment,
             }),
         );
         await app.listen().then(() => {
