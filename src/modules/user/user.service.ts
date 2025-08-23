@@ -17,9 +17,6 @@ export class UserService {
     constructor(
         @InjectRepository(User)
         private readonly userRepository: BaseRepository<User>,
-        // Example: Inject gRPC clients if needed
-        // @GrpcClient('notification-client') private readonly notificationClient: ClientProxy,
-        // @GrpcClient('payment-client') private readonly paymentClient: ClientProxy,
     ) {}
 
     @MonitorPerformance({ includeMemory: true, threshold: 500 })
@@ -152,70 +149,6 @@ export class UserService {
 
         return data;
     }
-
-    // Example method showing how to use gRPC clients with the new architecture
-    // Uncomment and modify if you need to call other services
-    /*
-    async getUserWithExternalData(userId: string): Promise<ApiResponseData<any>> {
-        const user = await this.findOne(userId);
-        
-        try {
-            // Example: Get notification preferences
-            const notificationService = this.notificationClient.getService<any>('NotificationService');
-            const notificationPrefs = await firstValueFrom(
-                notificationService.GetUserPreferences({ userId })
-            );
-            
-            // Example: Get payment methods
-            const paymentService = this.paymentClient.getService<any>('PaymentService');
-            const paymentMethods = await firstValueFrom(
-                paymentService.GetUserPaymentMethods({ userId })
-            );
-            
-            return new ApiResponseData({
-                data: {
-                    user: user.data,
-                    notificationPreferences: notificationPrefs,
-                    paymentMethods: paymentMethods
-                },
-                message: 'User with external data retrieved successfully',
-                statusCode: 200,
-            });
-        } catch (error) {
-            this.logger.error('Failed to get external data for user', { userId, error });
-            
-            // Return user data only if external services fail
-            return new ApiResponseData({
-                data: {
-                    user: user.data,
-                    notificationPreferences: null,
-                    paymentMethods: null
-                },
-                message: 'User retrieved successfully (external services unavailable)',
-                statusCode: 200,
-            });
-        }
-    }
-
-    // Example: Send notification after user creation
-    private async sendUserCreatedNotification(user: User): Promise<void> {
-        try {
-            const notificationService = this.notificationClient.getService<any>('NotificationService');
-            await firstValueFrom(
-                notificationService.SendWelcomeEmail({ 
-                    userId: user.id, 
-                    userName: user.name,
-                    email: user.email 
-                })
-            );
-            
-            this.logger.debug('Welcome notification sent successfully', { userId: user.id });
-        } catch (error) {
-            this.logger.error('Failed to send welcome notification', { userId: user.id, error });
-            // Don't throw - notification failure shouldn't break user creation
-        }
-    }
-    */
 
     /**
      *

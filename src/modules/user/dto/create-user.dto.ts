@@ -15,8 +15,6 @@ export class CreateUserDto {
     })
     email: string;
 
-    @PasswordField(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,}$/, {
-        description: 'User password (min 6 characters, must contain letters and numbers)',
-    })
+    @PasswordField(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,}$/, {})
     password: string;
 }

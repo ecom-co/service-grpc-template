@@ -10,7 +10,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UserService } from './user.service';
 
 @Controller()
-export class UserGrpcController {
+export class UserController {
     constructor(private readonly userService: UserService) {}
 
     @GrpcMethod('UserService', 'CreateUser')
