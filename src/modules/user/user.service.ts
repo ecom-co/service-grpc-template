@@ -26,27 +26,15 @@ export class UserService {
         operationName: 'user.create',
     })
     async create(dto: CreateUserDto): Promise<ApiResponseData<UserResponseDto>> {
-        const result = await this.userRepository.findOneOrCreate(
-            {
-                name: dto.name,
-            },
-            {
-                isActive: true,
-            },
-        );
+        const result = await this.userRepository.save(dto);
 
-        const data = new ApiResponseData({
+        this.logger.debug(new UserResponseDto(result));
+
+        return new ApiResponseData({
             data: new UserResponseDto(result),
             message: 'User created successfully',
             statusCode: 201,
         });
-
-        this.logger.debug('User created successfully', { userName: result.name, userId: result.id });
-
-        // Example: Send notification after user creation
-        // await this.sendUserCreatedNotification(result);
-
-        return data;
     }
 
     // Cache for 60 seconds
@@ -60,8 +48,11 @@ export class UserService {
         const [users, total] = await this.userRepository.findAndCount({
             select: {
                 id: true,
-                name: true,
+                email: true,
+                username: true,
                 isActive: true,
+                firstName: true,
+                lastName: true,
                 createdAt: true,
                 updatedAt: true,
             },
@@ -75,8 +66,6 @@ export class UserService {
             page,
             total,
         });
-
-        this.logger.debug('Paging', { paging });
 
         return new ApiPaginatedResponseData<UserResponseDto>({
             data: map(users, (user) => new UserResponseDto(user)),
@@ -96,8 +85,9 @@ export class UserService {
         const user = await this.userRepository.findOne({
             select: {
                 id: true,
-                name: true,
                 isActive: true,
+                firstName: true,
+                lastName: true,
                 createdAt: true,
                 updatedAt: true,
             },
@@ -108,15 +98,11 @@ export class UserService {
             throw new GrpcNotFoundException(`User with ID ${id} not found`);
         }
 
-        const data = new ApiResponseData({
+        return new ApiResponseData({
             data: new UserResponseDto(user),
             message: 'User retrieved successfully',
             statusCode: 200,
         });
-
-        this.logger.debug('User retrieved successfully', { userId: id });
-
-        return data;
     }
 
     @MonitorPerformance({ includeMemory: true, threshold: 500 })
@@ -139,15 +125,11 @@ export class UserService {
             ...dto,
         });
 
-        const data = new ApiResponseData({
+        return new ApiResponseData({
             data: new UserResponseDto(result),
             message: 'User updated successfully',
             statusCode: 200,
         });
-
-        this.logger.debug('User updated successfully', { userName: result.name, userId: id });
-
-        return data;
     }
 
     /**
@@ -172,15 +154,11 @@ export class UserService {
 
         await this.userRepository.remove(user);
 
-        const data = new ApiResponseData({
+        return new ApiResponseData({
             data: new UserResponseDto(user),
             message: 'User removed successfully',
             statusCode: 200,
         });
-
-        this.logger.debug('User removed successfully', { userName: user.name, userId: id });
-
-        return data;
     }
 
     discoverUserServices(): { host: string; name: string; port: number; status: string }[] {

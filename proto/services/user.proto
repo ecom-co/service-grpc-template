@@ -11,9 +11,11 @@ service UserService {
 }
 
 message CreateUserRequest {
-  string name = 1;
-  string email = 2;
-  string password = 3;
+  string firstName = 1;
+  string lastName = 2;
+  string username = 3;
+  string email = 4;
+  string password = 5;
 }
 
 message GetUserRequest {
@@ -22,8 +24,11 @@ message GetUserRequest {
 
 message UpdateUserRequest {
   string id = 1;
-  string name = 2;
-  string email = 3;
+  string firstName = 2;
+  string lastName = 3;
+  string username = 4;
+  string email = 5;
+  bool isActive = 6;
 }
 
 message DeleteUserRequest {
@@ -37,11 +42,14 @@ message ListUsersRequest {
 
 message UserResponseDto {
   string id = 1;
-  string name = 2;
-  string email = 3;
-  bool isActive = 4;
-  string createdAt = 5;
-  string updatedAt = 6;
+  string firstName = 2;
+  string lastName = 3;
+  string username = 4;
+  string email = 5;
+  string fullName = 6;
+  bool isActive = 7;
+  string createdAt = 8;
+  string updatedAt = 9;
 }
 
 message DeleteResponseData {

@@ -53,13 +53,6 @@ export class UserController {
 
     @GrpcMethod('UserService', 'DeleteUser')
     async deleteUser(data: GetUserDto) {
-        const result = await this.userService.remove(data.id);
-
-        // Map the delete response to match proto structure
-        return {
-            deleteData: result.data,
-            message: result.message,
-            statusCode: result.statusCode,
-        };
+        return await this.userService.remove(data.id);
     }
 }
