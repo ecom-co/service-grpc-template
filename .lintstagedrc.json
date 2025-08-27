@@ -1,0 +1,7 @@
+{
+    "src/**/*.{js,jsx,ts,tsx}": ["eslint --fix --max-warnings 0 --no-warn-ignored", "npm run format:staged"],
+    "test/**/*.{js,jsx,ts,tsx}": ["eslint --fix --max-warnings 0 --no-warn-ignored", "npm run format:staged"],
+    "*.{json,yml,yaml}": ["npm run format:staged"],
+    "*.md": ["npm run format:staged"],
+    "package.json": ["npm run format:staged", "npx sort-package-json"]
+}

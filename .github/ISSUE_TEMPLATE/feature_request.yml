@@ -1,0 +1,51 @@
+name: Feature request
+description: Suggest an idea for this project
+title: 'feat: <short description>'
+labels: ['enhancement']
+assignees: []
+body:
+    - type: textarea
+      id: summary
+      attributes:
+          label: Summary
+          description: What problem are you trying to solve?
+          placeholder: Describe the value of this feature
+      validations:
+          required: true
+
+    - type: textarea
+      id: proposal
+      attributes:
+          label: Proposed solution
+          description: How should we implement this?
+          placeholder: Outline a high-level approach
+      validations:
+          required: true
+
+    - type: textarea
+      id: alternatives
+      attributes:
+          label: Alternatives considered
+          placeholder: Any other solutions or features you've considered
+
+    - type: textarea
+      id: risks
+      attributes:
+          label: Risks & dependencies
+          placeholder: Any risks, affected components, or external dependencies
+
+    - type: textarea
+      id: acceptance
+      attributes:
+          label: Acceptance criteria
+          placeholder: Define clear, testable acceptance criteria
+      validations:
+          required: true
+
+    - type: checkboxes
+      id: checks
+      attributes:
+          label: Checks
+          options:
+              - label: I searched existing issues
+                required: true

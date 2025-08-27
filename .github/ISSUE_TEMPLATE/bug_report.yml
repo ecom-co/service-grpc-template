@@ -1,0 +1,101 @@
+name: Bug report
+description: File a bug/defect report
+title: 'fix: <short description>'
+labels: ['bug']
+assignees: []
+body:
+    - type: markdown
+      attributes:
+          value: |
+              Thanks for taking the time to fill out this bug report!
+
+    - type: textarea
+      id: summary
+      attributes:
+          label: Summary
+          description: A clear and concise description of what the bug is.
+          placeholder: Describe the bug
+      validations:
+          required: true
+
+    - type: textarea
+      id: steps
+      attributes:
+          label: Steps to reproduce
+          description: Provide steps we can follow to reproduce the issue.
+          placeholder: |
+              1. Go to ...
+              2. Run ...
+              3. Observe ...
+      validations:
+          required: true
+
+    - type: input
+      id: expected
+      attributes:
+          label: Expected behavior
+          placeholder: What should have happened?
+      validations:
+          required: true
+
+    - type: input
+      id: actual
+      attributes:
+          label: Actual behavior
+          placeholder: What actually happened?
+      validations:
+          required: true
+
+    - type: dropdown
+      id: area
+      attributes:
+          label: Affected area
+          multiple: true
+          options:
+              - API
+              - Database
+              - Docker
+              - Docs
+              - CI/CD
+              - Other
+
+    - type: dropdown
+      id: severity
+      attributes:
+          label: Severity
+          options:
+              - blocker (outage/data-loss)
+              - critical (major functionality broken)
+              - minor (workaround exists)
+              - trivial
+      validations:
+          required: true
+
+    - type: textarea
+      id: logs
+      attributes:
+          label: Relevant logs/output
+          description: Paste any relevant logs. Use backticks to format.
+          render: shell
+
+    - type: input
+      id: version
+      attributes:
+          label: Version/Commit
+          placeholder: e.g., v1.2.3 or commit hash
+
+    - type: textarea
+      id: environment
+      attributes:
+          label: Environment
+          placeholder: OS, Node version, Docker on/off, browser (if UI)
+
+    - type: checkboxes
+      id: checks
+      attributes:
+          label: Checks
+          options:
+              - label: I searched existing issues
+                required: true
+              - label: I can reproduce this consistently
+              - label: I can provide a minimal reproduction
