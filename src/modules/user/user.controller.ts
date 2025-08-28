@@ -2,12 +2,11 @@ import { Controller } from '@nestjs/common';
 
 import { GrpcMethod } from '@nestjs/microservices';
 
-import { CreateUserDto } from './dto/create-user.dto';
-import { GetUserDto } from './dto/get-user.dto';
-import { ListUsersDto } from './dto/list-users.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-
-import { UserService } from './user.service';
+import { CreateUserDto } from '@/modules/user/dto/create-user.dto';
+import { GetUserDto } from '@/modules/user/dto/get-user.dto';
+import { ListUsersDto } from '@/modules/user/dto/list-users.dto';
+import { UpdateUserDto } from '@/modules/user/dto/update-user.dto';
+import { UserService } from '@/modules/user/user.service';
 
 @Controller()
 export class UserController {
