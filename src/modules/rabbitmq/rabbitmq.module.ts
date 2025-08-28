@@ -5,8 +5,7 @@ import { RabbitMQModule } from '@ecom-co/rabbitmq';
 import { ConfigModule } from '@/modules/config/config.module';
 import { ConfigServiceApp } from '@/modules/config/config.service';
 import { OrdersRabbitHandler } from '@/modules/rabbitmq/rabbitmq.handler';
-
-import { RabbitmqService } from './rabbitmq.service';
+import { RabbitmqService } from '@/modules/rabbitmq/rabbitmq.service';
 
 @Module({
     imports: [

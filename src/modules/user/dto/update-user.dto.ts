@@ -1,5 +1,5 @@
 import { PartialType } from '@ecom-co/utils';
 
-import { CreateUserDto } from './create-user.dto';
+import { CreateUserDto } from '@/modules/user/dto/create-user.dto';
 
 export class UpdateUserDto extends PartialType(CreateUserDto) {}

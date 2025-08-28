@@ -12,6 +12,11 @@ import { ConfigServiceApp } from '@/modules/config/config.service';
 import { AppModule } from '@/app.module';
 
 /**
+ * Get proto file path that works in both dev (src) and prod (dist)
+ */
+const getProtoPath = (service: string): string => join(__dirname, 'proto/services', `${service}.proto`);
+
+/**
  * Bootstrap the NestJS application
  */
 const bootstrap = async (): Promise<void> => {
@@ -21,10 +26,7 @@ const bootstrap = async (): Promise<void> => {
         const app = await NestFactory.createMicroservice<MicroserviceOptions>(AppModule, {
             options: {
                 package: ['user', 'auth'],
-                protoPath: [
-                    join(process.cwd(), 'proto/services/user.proto'),
-                    join(process.cwd(), 'proto/services/auth.proto'),
-                ],
+                protoPath: [getProtoPath('user'), getProtoPath('auth')],
                 url: '0.0.0.0:50052',
             },
             transport: Transport.GRPC,
@@ -54,7 +56,9 @@ const bootstrap = async (): Promise<void> => {
             }),
         );
         await app.listen().then(() => {
-            logger.log('gRPC microservice is listening on port 50052');
+            logger.log(
+                `gRPC microservice is listening on port ${configServiceApp.grpcPort} (${configServiceApp.grpcUrl})`,
+            );
         });
     } catch (error) {
         logger.error('Failed to start gRPC microservice:', error);
