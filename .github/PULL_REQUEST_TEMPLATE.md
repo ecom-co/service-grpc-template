@@ -10,6 +10,23 @@ Use GitHub linking keywords so issues auto-close when merged.
 - Fixes #456
 - Resolves #789
 
+## Related pull requests
+
+List related PRs across repos (if any). Use deep links so reviewers can follow context.
+
+- org/repo#123
+- org/another-repo#456
+
+## Related migrations (if any)
+
+Group by PR; list all migration filenames under that PR. Add notes about order/rollback if relevant.
+
+- PR org/repo#789
+    - file 20250101120000_add_orders_table
+    - file 20250102103045_alter_users_add_status
+- PR #456
+    - file 20250105120010_add_payments
+
 ## Type of change
 
 - [ ] feat (new feature)
