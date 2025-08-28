@@ -11,26 +11,13 @@ export class ConfigServiceApp {
         return this.configService.get('DATABASE_URL');
     }
 
-    // Elasticsearch Configuration
-    get elasticsearchPassword(): string | undefined {
-        return this.configService.get('ELASTICSEARCH_PASSWORD');
-    }
-
-    get elasticsearchUrl(): string {
-        return this.configService.get('ELASTICSEARCH_URL');
-    }
-
-    get elasticsearchUsername(): string | undefined {
-        return this.configService.get('ELASTICSEARCH_USERNAME');
-    }
-
     // gRPC Configuration
     get grpcPackage(): string {
         return this.configService.get('GRPC_PACKAGE', 'app');
     }
 
     get grpcPort(): number {
-        return this.configService.get('GRPC_PORT', 50051);
+        return this.configService.get('GRPC_PORT', 50053);
     }
 
     get grpcProtoPath(): string {
@@ -48,6 +35,32 @@ export class ConfigServiceApp {
     // Tracing Configuration
     get jaegerEndpoint(): string | undefined {
         return this.configService.get('JAEGER_ENDPOINT');
+    }
+
+    // JWT Configuration for auth (access token)
+    get jwtAccessTokenExpirationTime(): number {
+        return this.configService.get('JWT_ACCESS_TOKEN_EXPIRATION_TIME');
+    }
+
+    get jwtAccessTokenPrivateKey(): string {
+        return this.configService.get('JWT_ACCESS_TOKEN_PRIVATE_KEY');
+    }
+
+    get jwtAccessTokenPublicKey(): string {
+        return this.configService.get('JWT_ACCESS_TOKEN_PUBLIC_KEY');
+    }
+
+    // JWT Configuration for auth (refresh token)
+    get jwtRefreshTokenExpirationTime(): number {
+        return this.configService.get('JWT_REFRESH_TOKEN_EXPIRATION_TIME');
+    }
+
+    get jwtRefreshTokenPrivateKey(): string {
+        return this.configService.get('JWT_REFRESH_TOKEN_PRIVATE_KEY');
+    }
+
+    get jwtRefreshTokenPublicKey(): string {
+        return this.configService.get('JWT_REFRESH_TOKEN_PUBLIC_KEY');
     }
 
     get nodeEnv(): string {

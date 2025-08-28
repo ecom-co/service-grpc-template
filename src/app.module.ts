@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 
 import { ConfigModule as NestConfigModule } from '@nestjs/config';
 
-import { ElasticsearchModule } from '@ecom-co/elasticsearch';
 import { CORE_ENTITIES, OrmModule } from '@ecom-co/orm';
 import { RedisModule } from '@ecom-co/redis';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 import { ConfigModule } from '@/modules/config/config.module';
 import { ConfigServiceApp } from '@/modules/config/config.service';
@@ -12,10 +12,12 @@ import { RabbitmqModule } from '@/modules/rabbitmq/rabbitmq.module';
 
 import { AppGrpcController } from '@/app.grpc.controller';
 
+import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
 
 @Module({
     imports: [
+        EventEmitterModule.forRoot(),
         NestConfigModule.forRoot(),
         OrmModule.forRootAsync({
             imports: [ConfigModule],
@@ -51,22 +53,10 @@ import { UserModule } from './modules/user/user.module';
             }),
             // predeclare: ['forward'],
         }),
-        ElasticsearchModule.forRootAsync({
-            imports: [ConfigModule],
-            inject: [ConfigServiceApp],
-            predeclare: ['analytics'],
-            useFactory: (config: ConfigServiceApp) => ({
-                autoCreateIndices: true,
-                clients: [
-                    { name: 'default', node: config.elasticsearchUrl },
-                    { name: 'analytics', node: config.elasticsearchUrl },
-                ],
-                documents: [],
-            }),
-        }),
         RabbitmqModule,
         ConfigModule,
         UserModule,
+        AuthModule,
     ],
     controllers: [AppGrpcController],
 })

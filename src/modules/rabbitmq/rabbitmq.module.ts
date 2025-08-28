@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import { ExchangeType, RabbitMQModule } from '@ecom-co/rabbitmq';
+import { RabbitMQModule } from '@ecom-co/rabbitmq';
 
 import { ConfigModule } from '@/modules/config/config.module';
 import { ConfigServiceApp } from '@/modules/config/config.service';
@@ -22,30 +22,11 @@ import { RabbitmqService } from './rabbitmq.service';
                     },
                 ],
                 connectionInitOptions: { reject: true, timeout: 5000, wait: true },
-                debug: configService.nodeEnv === 'development', // Enable debug in development
+                debug: configService.isDevelopment,
                 enableControllerDiscovery: true,
                 enableDirectReplyTo: true,
-                exchanges: [
-                    { name: 'demo.exchange2', type: ExchangeType.Topic },
-                    { name: 'exchange1', type: ExchangeType.Topic },
-                ],
-                queues: [
-                    {
-                        name: 'rpc-queue',
-                        exchange: 'exchange1',
-                        routingKey: 'rpc-route',
-                    },
-                    {
-                        name: 'rpc.demo.exchange2.rpc.routing.key',
-                        exchange: 'demo.exchange2',
-                        routingKey: 'rpc.routing.key',
-                    },
-                    {
-                        name: 'subscribe.queue',
-                        exchange: 'demo.exchange2',
-                        routingKey: 'subscribe.routing.key',
-                    },
-                ],
+                exchanges: [],
+                queues: [],
                 registerHandlers: true,
                 strictConfig: true,
                 uri: configService.rabbitmqUrl,
