@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import { ExecutionContext, Injectable, Logger } from '@nestjs/common';
 
 import { AuthGuard } from '@nestjs/passport';
 
@@ -17,6 +17,7 @@ interface GrpcCall {
 
 @Injectable()
 export class GrpcJwtGuard extends AuthGuard('jwt') {
+    private readonly logger = new Logger(GrpcJwtGuard.name);
     canActivate(context: ExecutionContext) {
         const rpcContext = context.switchToRpc();
         const call: GrpcCall = rpcContext.getContext();

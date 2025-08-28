@@ -1,11 +1,12 @@
 syntax = "proto3";
 package auth;
+import "google/protobuf/empty.proto";
 
 service AuthService {
   rpc Login (LoginRequest) returns (AuthResponse) {}
   rpc Register (RegisterRequest) returns (AuthResponse) {}
-  rpc RefreshToken (RefreshTokenRequest) returns (AuthResponse) {}
-  rpc GetProfile (GetProfileRequest) returns (GetProfileResponse) {}
+  rpc RefreshToken (google.protobuf.Empty) returns (AuthResponse) {}
+  rpc GetProfile (google.protobuf.Empty) returns (GetProfileResponse) {}
 }
 
 message LoginRequest {
@@ -22,13 +23,7 @@ message RegisterRequest {
   map<string, string> metadata = 5; // optional metadata
 }
 
-message RefreshTokenRequest {
-  string refreshToken = 1;
-}
-
-message GetProfileRequest {
-  string userId = 1;
-}
+// removed custom empty request messages; tokens are read from headers via guards
 
 message GetProfileResponse {
   AuthUser user = 1;

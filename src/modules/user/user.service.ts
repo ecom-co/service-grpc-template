@@ -12,7 +12,7 @@ import {
 } from '@ecom-co/grpc';
 import { BaseRepository, InjectRepository, User } from '@ecom-co/orm';
 import { ApiPaginatedResponseData, ApiResponseData, Paging } from '@ecom-co/utils';
-import * as bcrypt from 'bcrypt';
+import { compare, hash } from 'bcrypt';
 
 import { LoginDto } from '@/modules/auth/dto/login.dto';
 import { RegisterDto } from '@/modules/auth/dto/register.dto';
@@ -259,7 +259,7 @@ export class UserService {
             throw new GrpcNotFoundException(`User with ID ${id} not found`);
         }
 
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const hashedPassword = await hash(newPassword, 10);
 
         const result = await this.userRepository.save({
             ...user,
@@ -328,7 +328,7 @@ export class UserService {
             throw new GrpcUnauthorizedException('Invalid credentials');
         }
 
-        const isPasswordValid = await bcrypt.compare(dto.password, user.password);
+        const isPasswordValid = await compare(dto.password, user.password);
 
         if (!isPasswordValid) {
             throw new GrpcUnauthorizedException('Invalid credentials');
@@ -346,7 +346,7 @@ export class UserService {
             throw new GrpcConflictException('Username already exists');
         }
 
-        const hashedPassword = await bcrypt.hash(dto.password, 10);
+        const hashedPassword = await hash(dto.password, 10);
 
         const user = await this.userRepository.save({
             ...dto,
