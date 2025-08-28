@@ -1,5 +1,5 @@
 {
-    "name": "ecom-backend",
+    "name": "ecom-authorizations-service",
     "version": "0.0.1",
     "private": true,
     "description": "",
@@ -66,6 +66,7 @@
         "@elastic/elasticsearch": "^8.19.0",
         "@grpc/grpc-js": "^1.13.4",
         "@grpc/proto-loader": "^0.7.15",
+        "@grpc/reflection": "^1.0.4",
         "@nestjs/common": "^11.0.1",
         "@nestjs/config": "^4.0.2",
         "@nestjs/core": "^11.0.1",
