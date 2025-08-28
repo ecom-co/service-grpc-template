@@ -1,9 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
-
 import { assign } from 'lodash';
 
 import { User } from '@ecom-co/orm';
-import { Exclude, Expose, plainToInstance } from '@ecom-co/utils';
+import { ApiProperty, Exclude, Expose, plainToInstance } from '@ecom-co/utils';
 
 @Exclude()
 export class UserResponseDto {

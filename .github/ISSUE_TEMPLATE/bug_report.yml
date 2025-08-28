@@ -9,20 +9,79 @@ body:
           value: |
               Thanks for taking the time to fill out this bug report!
 
+    - type: markdown
+      attributes:
+          value: |
+              ### Description
+
     - type: textarea
       id: summary
       attributes:
           label: Summary
-          description: A clear and concise description of what the bug is.
-          placeholder: Describe the bug
+          description: A clear and concise description of the bug.
+          placeholder: Briefly describe the issue
       validations:
           required: true
+
+    - type: markdown
+      attributes:
+          value: |
+              ### Severity & Impact
+
+    - type: dropdown
+      id: severity
+      attributes:
+          label: Severity
+          options:
+              - blocker (outage/data-loss)
+              - critical (major functionality broken)
+              - minor (workaround exists)
+              - trivial
+      validations:
+          required: true
+
+    - type: input
+      id: impact
+      attributes:
+          label: Impact
+          placeholder: Who/what is affected? (e.g., login blocked for all users)
+
+    - type: dropdown
+      id: reproducibility
+      attributes:
+          label: Reproducibility
+          options:
+              - always
+              - often
+              - rarely
+              - once
+
+    - type: dropdown
+      id: area
+      attributes:
+          label: Affected area
+          multiple: true
+          options:
+              - API
+              - Auth
+              - RabbitMQ
+              - Redis
+              - Config/Env
+              - Docker/Infra
+              - CI/CD
+              - Docs
+              - Other
+
+    - type: markdown
+      attributes:
+          value: |
+              ### Reproduction
 
     - type: textarea
       id: steps
       attributes:
           label: Steps to reproduce
-          description: Provide steps we can follow to reproduce the issue.
+          description: Provide exact steps to reproduce the issue.
           placeholder: |
               1. Go to ...
               2. Run ...
@@ -46,30 +105,31 @@ body:
       validations:
           required: true
 
-    - type: dropdown
-      id: area
+    - type: markdown
       attributes:
-          label: Affected area
-          multiple: true
-          options:
-              - API
-              - Database
-              - Docker
-              - Docs
-              - CI/CD
-              - Other
+          value: |
+              ### Environment
 
-    - type: dropdown
-      id: severity
+    - type: textarea
+      id: environment
       attributes:
-          label: Severity
-          options:
-              - blocker (outage/data-loss)
-              - critical (major functionality broken)
-              - minor (workaround exists)
-              - trivial
-      validations:
-          required: true
+          label: Environment
+          placeholder: |
+              OS/macOS version:
+              Node version:
+              Docker: on/off (version)
+              Service mode: dev/stage/prod
+
+    - type: input
+      id: version
+      attributes:
+          label: Version/Commit
+          placeholder: e.g., v1.2.3 or commit hash
+
+    - type: markdown
+      attributes:
+          value: |
+              ### Evidence
 
     - type: textarea
       id: logs
@@ -78,17 +138,39 @@ body:
           description: Paste any relevant logs. Use backticks to format.
           render: shell
 
-    - type: input
-      id: version
+    - type: markdown
       attributes:
-          label: Version/Commit
-          placeholder: e.g., v1.2.3 or commit hash
+          value: |
+              ### Regression & Workaround
+
+    - type: checkboxes
+      id: regression
+      attributes:
+          label: Regression
+          options:
+              - label: This worked in a previous version
 
     - type: textarea
-      id: environment
+      id: workaround
       attributes:
-          label: Environment
-          placeholder: OS, Node version, Docker on/off, browser (if UI)
+          label: Known workaround (if any)
+          placeholder: Describe any temporary workaround
+
+    - type: markdown
+      attributes:
+          value: |
+              ### Related
+
+    - type: input
+      id: links
+      attributes:
+          label: Related links
+          placeholder: PRs, commits, issue IDs, dashboards
+
+    - type: markdown
+      attributes:
+          value: |
+              ### Final checks
 
     - type: checkboxes
       id: checks

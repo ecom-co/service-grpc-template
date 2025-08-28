@@ -4,14 +4,24 @@ title: 'feat: <short description>'
 labels: ['enhancement']
 assignees: []
 body:
+    - type: markdown
+      attributes:
+          value: |
+              ### Summary & Motivation
+
     - type: textarea
       id: summary
       attributes:
           label: Summary
-          description: What problem are you trying to solve?
+          description: What problem are you trying to solve? Why now?
           placeholder: Describe the value of this feature
       validations:
           required: true
+
+    - type: markdown
+      attributes:
+          value: |
+              ### Proposed Solution
 
     - type: textarea
       id: proposal
@@ -22,17 +32,57 @@ body:
       validations:
           required: true
 
+    - type: markdown
+      attributes:
+          value: |
+              ### Alternatives & Scope
+
     - type: textarea
       id: alternatives
       attributes:
           label: Alternatives considered
           placeholder: Any other solutions or features you've considered
 
+    - type: dropdown
+      id: area
+      attributes:
+          label: Affected area (scope)
+          multiple: true
+          options:
+              - API
+              - Auth
+              - RabbitMQ
+              - Redis
+              - Config/Env
+              - Docker/Infra
+              - CI/CD
+              - Docs
+              - Other
+
+    - type: markdown
+      attributes:
+          value: |
+              ### Risks, Dependencies & Impact
+
     - type: textarea
       id: risks
       attributes:
           label: Risks & dependencies
           placeholder: Any risks, affected components, or external dependencies
+
+    - type: dropdown
+      id: impact
+      attributes:
+          label: Impact level
+          options:
+              - high (user-facing / multiple services)
+              - medium (single service)
+              - low (internal only)
+
+    - type: markdown
+      attributes:
+          value: |
+              ### Acceptance Criteria
 
     - type: textarea
       id: acceptance
@@ -41,6 +91,29 @@ body:
           placeholder: Define clear, testable acceptance criteria
       validations:
           required: true
+
+    - type: textarea
+      id: out_of_scope
+      attributes:
+          label: Out of scope
+          placeholder: Explicitly state what is not included
+
+    - type: markdown
+      attributes:
+          value: |
+              ### Metrics & Links
+
+    - type: input
+      id: metrics
+      attributes:
+          label: Metrics/Monitoring
+          placeholder: KPIs to track (latency, error rate, etc.)
+
+    - type: input
+      id: links
+      attributes:
+          label: Related links
+          placeholder: PRs, issues, designs, docs
 
     - type: checkboxes
       id: checks

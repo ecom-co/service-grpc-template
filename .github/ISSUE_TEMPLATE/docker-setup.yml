@@ -9,6 +9,11 @@ body:
           value: |
               Document the current Docker setup and ensure consistency across machines.
 
+    - type: markdown
+      attributes:
+          value: |
+              ### Summary
+
     - type: textarea
       id: summary
       attributes:
@@ -16,6 +21,11 @@ body:
           placeholder: Describe the docker stack and objectives
       validations:
           required: true
+
+    - type: markdown
+      attributes:
+          value: |
+              ### Services
 
     - type: checkboxes
       id: services
@@ -29,6 +39,11 @@ body:
               - label: PgAdmin
               - label: Elasticsearch & Kibana
 
+    - type: markdown
+      attributes:
+          value: |
+              ### Tasks
+
     - type: checkboxes
       id: tasks
       attributes:
@@ -40,6 +55,11 @@ body:
               - label: Helper scripts added (docker/docker-scripts.md)
               - label: DB init script mounted (docker/postgres/init.sql)
               - label: Health checks verified (api, db, redis, mq, es, kibana)
+
+    - type: markdown
+      attributes:
+          value: |
+              ### Notes & Links
 
     - type: textarea
       id: notes
