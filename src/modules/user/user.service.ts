@@ -1,21 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-import { map, omit } from 'lodash';
+import { map } from 'lodash';
 
-import {
-    Cacheable,
-    GrpcConflictException,
-    GrpcNotFoundException,
-    GrpcUnauthorizedException,
-    MonitorPerformance,
-    TraceOperation,
-} from '@ecom-co/grpc';
+import { Cacheable, GrpcNotFoundException, MonitorPerformance, TraceOperation } from '@ecom-co/grpc';
 import { BaseRepository, InjectRepository, User } from '@ecom-co/orm';
 import { ApiPaginatedResponseData, ApiResponseData, Paging } from '@ecom-co/utils';
-import { compare, hash } from 'bcrypt';
-
-import { LoginDto } from '@/modules/auth/dto/login.dto';
-import { RegisterDto } from '@/modules/auth/dto/register.dto';
+import { hash } from 'bcrypt';
 
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -312,74 +302,5 @@ export class UserService {
                 port: 50051,
             },
         ];
-    }
-
-    async login(dto: LoginDto): Promise<User> {
-        const user = await this.userRepository.findOneOrFail({
-            select: {
-                id: true,
-                email: true,
-                password: true,
-            },
-            where: { email: dto.email },
-        });
-
-        if (!user) {
-            throw new GrpcUnauthorizedException('Invalid credentials');
-        }
-
-        const isPasswordValid = await compare(dto.password, user.password);
-
-        if (!isPasswordValid) {
-            throw new GrpcUnauthorizedException('Invalid credentials');
-        }
-
-        return omit(user, ['password']);
-    }
-
-    async register(dto: RegisterDto): Promise<User> {
-        if (await this.checkEmailExists(dto.email)) {
-            throw new GrpcConflictException('Email already exists');
-        }
-
-        if (await this.checkUsernameExists(dto.username)) {
-            throw new GrpcConflictException('Username already exists');
-        }
-
-        const hashedPassword = await hash(dto.password, 10);
-
-        const user = await this.userRepository.save({
-            ...dto,
-            password: hashedPassword,
-        });
-
-        return omit(user, ['password']);
-    }
-
-    @MonitorPerformance({ includeMemory: true, threshold: 500 })
-    @TraceOperation({
-        includeArgs: true,
-        includeResult: false,
-        operationName: 'user.toggleActive',
-    })
-    async toggleActive(id: string): Promise<ApiResponseData<UserResponseDto>> {
-        const user = await this.userRepository.findOne({
-            where: { id },
-        });
-
-        if (!user) {
-            throw new GrpcNotFoundException(`User with ID ${id} not found`);
-        }
-
-        const result = await this.userRepository.save({
-            ...user,
-            isActive: !user.isActive,
-        });
-
-        return new ApiResponseData({
-            data: new UserResponseDto(result),
-            message: `User ${result.isActive ? 'activated' : 'deactivated'} successfully`,
-            statusCode: 200,
-        });
     }
 }

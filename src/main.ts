@@ -32,10 +32,10 @@ const bootstrap = async (): Promise<void> => {
                 onLoadPackageDefinition: (pkg: PackageDefinition, server: Server) => {
                     new ReflectionService(pkg).addToServer(server);
                 },
-                package: ['user', 'auth'],
-                protoPath: [getProtoPath('user'), getProtoPath('auth')],
+                package: ['user'],
+                protoPath: [getProtoPath('user')],
 
-                url: '0.0.0.0:50052',
+                url: '0.0.0.0:50053',
             },
             transport: Transport.GRPC,
         });

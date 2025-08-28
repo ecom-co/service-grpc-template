@@ -1,5 +1,5 @@
 {
-    "name": "ecom-authorizations-service",
+    "name": "ecom-template-grpc-service",
     "version": "0.0.1",
     "private": true,
     "description": "",
@@ -58,11 +58,13 @@
         }
     },
     "dependencies": {
+        "@ecom-co/elasticsearch": "^0.1.19",
         "@ecom-co/grpc": "^1.1.11",
         "@ecom-co/orm": "^0.1.23",
         "@ecom-co/rabbitmq": "^2.0.13",
         "@ecom-co/redis": "^0.1.15",
         "@ecom-co/utils": "^1.0.21",
+        "@elastic/elasticsearch": "^8.19.1",
         "@grpc/grpc-js": "^1.13.4",
         "@grpc/proto-loader": "^0.7.15",
         "@grpc/reflection": "^1.0.4",
